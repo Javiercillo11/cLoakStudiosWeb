@@ -1,4 +1,5 @@
 ---
+import { withBase } from '../lib/paths';
 import '../styles/form.css';
 import Field from './form/Field.astro';
 import ChoiceGroup from './form/ChoiceGroup.astro';
@@ -59,7 +60,7 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
     mode === 'live' && (
       <>
         <input type="hidden" name="access_key" value={accessKey} />
-        <input type="hidden" name="subject" value="Nueva solicitud desde Cloak Studio" />
+        <input type="hidden" name="subject" value="Nueva solicitud desde cLoak Studios" />
       </>
     )
   }
@@ -223,7 +224,7 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
       />
       <span class="consent__box" aria-hidden="true"><Icon name="check" size={14} /></span>
       <span>
-        He leído y acepto la <a href="/privacidad" target="_blank" rel="noopener">política de privacidad</a>.{' '}
+        He leído y acepto la <a href={withBase('/privacidad')} target="_blank" rel="noopener">política de privacidad</a>.{' '}
         <span class="field__req">obligatorio</span>
       </span>
     </label>
@@ -241,7 +242,7 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
     </button>
     <p class="form-microcopy">
       Tus datos se utilizarán únicamente para gestionar tu consulta, de acuerdo con la{' '}
-      <a href="/privacidad" target="_blank" rel="noopener">política de privacidad</a>.
+      <a href={withBase('/privacidad')} target="_blank" rel="noopener">política de privacidad</a>.
     </p>
   </div>
 </form>
@@ -250,7 +251,7 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
 <div class="form-success" data-form-success tabindex="-1" hidden>
   <span class="form-success__icon" aria-hidden="true"><Icon name="check" size={26} /></span>
   <p class="form-success__tag" data-success-test hidden>Modo prueba · no se ha enviado ningún email</p>
-  <h3 class="form-success__title">¡Gracias por contactar con Cloak Studio!</h3>
+  <h3 class="form-success__title">¡Gracias por contactar con cLoak Studios!</h3>
   <p>Hemos recibido tu solicitud. Revisaremos la información y nos pondremos en contacto contigo.</p>
   <button type="button" class="btn-reset" data-form-reset>Enviar otra solicitud</button>
 </div>

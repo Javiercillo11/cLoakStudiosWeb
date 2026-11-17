@@ -1,11 +1,12 @@
 ---
+import { isHomePath, withBase } from '../lib/paths';
 import Logo from './Logo.astro';
 import Icon from './Icon.astro';
 import { nav } from '../data/site';
 
 // En páginas internas, los anclajes apuntan a la home.
-const isHome = Astro.url.pathname === '/' || Astro.url.pathname === '';
-const link = (href: string) => (isHome ? href : `/${href}`);
+const isHome = isHomePath(Astro.url.pathname);
+const link = (href: string) => (isHome ? href : withBase(`/${href}`));
 ---
 
 <header class="site-header" data-header>

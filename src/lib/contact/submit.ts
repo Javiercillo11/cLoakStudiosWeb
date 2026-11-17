@@ -29,7 +29,7 @@ export async function submitContact(
   if (mode === 'test') {
     // Modo prueba: NO se envía ningún email. Se muestra el contenido para revisarlo.
     const { access_key: _omit, ...visible } = payload;
-    console.info('[Cloak Studio · MODO PRUEBA] Solicitud que se enviaría:', visible);
+    console.info('[cLoak Studios · MODO PRUEBA] Solicitud que se enviaría:', visible);
     return { ok: true, test: true };
   }
 

@@ -242,8 +242,8 @@ export function buildPayload(v: ContactValues, accessKey: string, receivedAt: Da
   const service = v.service ? SERVICE_LABELS[v.service] : '';
   const payload: Record<string, string | boolean> = {
     access_key: accessKey,
-    subject: `Nueva solicitud desde Cloak Studio — ${service}`,
-    from_name: 'Web Cloak Studio',
+    subject: `Nueva solicitud desde cLoak Studios — ${service}`,
+    from_name: 'Web cLoak Studios',
     botcheck: v.botcheck,
     Servicio: service,
     name: v.name,

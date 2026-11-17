@@ -1,4 +1,5 @@
 ---
+import { absoluteUrl } from '../lib/paths';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import Services from '../components/Services.astro';
@@ -15,18 +16,18 @@ const jsonLd = {
   '@graph': [
     {
       '@type': 'WebSite',
-      '@id': `${site.url}/#website`,
-      url: site.url,
+      '@id': `${absoluteUrl('/')}#website`,
+      url: absoluteUrl('/'),
       name: site.name,
       inLanguage: 'es',
     },
     {
       '@type': 'ProfessionalService',
-      '@id': `${site.url}/#studio`,
+      '@id': `${absoluteUrl('/')}#studio`,
       name: site.name,
-      url: site.url,
+      url: absoluteUrl('/'),
       description: site.description,
-      logo: `${site.url}/icon-512.png`,
+      logo: absoluteUrl('/icon-512.png'),
       hasOfferCatalog: {
         '@type': 'OfferCatalog',
         name: 'Servicios',

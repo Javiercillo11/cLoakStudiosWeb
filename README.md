@@ -1,4 +1,4 @@
-# Cloak Studio — web comercial
+# cLoak Studios — web comercial
 
 Web de [cloakstudio.app](https://cloakstudio.app): presentación de los tres servicios (páginas web, aplicaciones de gestión y QR para reseñas) y formulario inteligente de solicitud de presupuesto.
 
@@ -62,6 +62,8 @@ Ver `.env.example`.
 
 El workflow `.github/workflows/deploy.yml` ejecuta tests, `astro check`, build y publica en cada push a `main`.
 
+El workflow pregunta a GitHub (`actions/configure-pages`) dónde se publica la web y construye con ese origen y prefijo (`SITE_URL` / `BASE_PATH`, ver `astro.config.mjs`). Así funciona igual en `https://<usuario>.github.io/<repo>/` que en el dominio propio, sin tocar código. Las rutas internas usan `withBase()` / `absoluteUrl()` de `src/lib/paths.ts`.
+
 1. **Settings → Pages → Source:** «GitHub Actions».
 2. **Settings → Secrets and variables → Actions → Variables:** crear `PUBLIC_WEB3FORMS_ACCESS_KEY`.
 3. **Dominio:** `public/CNAME` ya contiene `cloakstudio.app`. En el DNS del dominio, apuntar los registros `A`/`AAAA` del apex a las IP de GitHub Pages (o un `ALIAS`/`ANAME`) y activar «Enforce HTTPS».
@@ -71,7 +73,7 @@ El workflow `.github/workflows/deploy.yml` ejecuta tests, `astro check`, build y
 
 ## Marca
 
-- Logo oficial: `brand/logo.jpeg`. `npm run brand:assets` recorta el icono, le aplica una máscara redondeada con transparencia y genera `src/assets/brand/logo-mark.png` (optimizado a WebP por Astro), favicon (`.ico` y PNG), `apple-touch-icon` e iconos del manifest (incluido uno *maskable*).
+- Logo oficial: `brand/logo.jpeg`. `npm run brand:assets` separa la «C» del fondo oscuro (transparencia real) y genera `src/assets/brand/logo-symbol.png` (optimizado a WebP por Astro), favicon (`.ico` y PNG), `apple-touch-icon` e iconos del manifest (incluido uno *maskable*).
 - Imagen Open Graph: `public/og-image.png`, renderizada desde `scripts/og-image.html` con las fuentes de la marca (navegador headless, 1200×630).
 - Tokens: paleta del brand guide + derivados para cumplir WCAG AA:
   - Botones con relleno `#7C3AED` (blanco 5,7:1). El `#8B5CF6` de la guía con texto blanco da 4,23:1 y no pasa AA, así que se reserva para bordes, iconos y detalles.

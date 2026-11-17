@@ -77,7 +77,7 @@ test('el payload solo incluye los campos del servicio elegido', () => {
     }),
   );
   const p = buildPayload(v, 'KEY', new Date('2026-11-17T10:00:00Z'));
-  assert.equal(p.subject, 'Nueva solicitud desde Cloak Studio — Página web para negocio');
+  assert.equal(p.subject, 'Nueva solicitud desde cLoak Studios — Página web para negocio');
   assert.equal(p['¿Qué necesita?'], 'Web con reservas');
   assert.equal(p['¿Qué necesita gestionar?'], undefined);
   assert.equal(p['Plataforma'], undefined);

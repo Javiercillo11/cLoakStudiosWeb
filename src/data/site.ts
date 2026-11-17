@@ -2,10 +2,9 @@
 // y la interfaz lo oculta automáticamente hasta que se rellene.
 
 export const site = {
-  name: 'Cloak Studio',
-  url: 'https://cloakstudio.app',
+  name: 'cLoak Studios',
   locale: 'es_ES',
-  title: 'Cloak Studio | Páginas web, aplicaciones y soluciones digitales',
+  title: 'cLoak Studios',
   description:
     'Creamos páginas web para negocios, aplicaciones de gestión y soluciones QR para reseñas. Cuéntanos qué necesita tu negocio.',
   tagline: 'Digital solutions for ambitious businesses.',

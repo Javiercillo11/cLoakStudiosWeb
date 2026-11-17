@@ -1,6 +1,7 @@
 ---
+import { withBase } from '../lib/paths';
 import { Image } from 'astro:assets';
-import logoMark from '../assets/brand/logo-mark.png';
+import logoMark from '../assets/brand/logo-symbol.png';
 
 interface Props {
   /** Tamaño del símbolo en px. */
@@ -11,10 +12,10 @@ interface Props {
   class?: string;
 }
 
-const { size = 34, wordmark = true, href = '/', class: className } = Astro.props;
+const { size = 34, wordmark = true, href = withBase('/'), class: className } = Astro.props;
 ---
 
-<a href={href} class:list={['logo', className]} aria-label="Cloak Studio — inicio">
+<a href={href} class:list={['logo', className]} aria-label="cLoak Studios — inicio">
   <Image
     src={logoMark}
     alt=""
@@ -28,7 +29,7 @@ const { size = 34, wordmark = true, href = '/', class: className } = Astro.props
   {
     wordmark && (
       <span class="logo__word" aria-hidden="true">
-        Cloak<span class="logo__studio">Studio</span>
+        cLoak<span class="logo__studio">Studios</span>
       </span>
     )
   }
@@ -45,7 +46,6 @@ const { size = 34, wordmark = true, href = '/', class: className } = Astro.props
   }
 
   .logo__mark {
-    border-radius: 24%;
     flex: none;
   }
 

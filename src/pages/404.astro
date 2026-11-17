@@ -1,16 +1,17 @@
 ---
+import { withBase } from '../lib/paths';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Button from '../components/Button.astro';
 ---
 
-<BaseLayout title="Página no encontrada | Cloak Studio" path="/404" noindex>
+<BaseLayout title="Página no encontrada | cLoak Studios" path="/404" noindex>
   <section class="container notfound">
     <p class="eyebrow">Error 404</p>
     <h1>Esta página no existe.</h1>
     <p class="lead">Puede que el enlace haya cambiado. Vuelve al inicio o cuéntanos qué buscabas.</p>
     <div class="notfound__actions">
-      <Button href="/">Volver al inicio</Button>
-      <Button href="/#contacto" variant="secondary">Contactar</Button>
+      <Button href={withBase('/')}>Volver al inicio</Button>
+      <Button href={withBase('/#contacto')} variant="secondary">Contactar</Button>
     </div>
   </section>
 </BaseLayout>

@@ -1,0 +1,13 @@
+{
+  // Oculta del explorador carpetas generadas o de dependencias (siguen existiendo en disco).
+  "files.exclude": {
+    "**/node_modules": true,
+    "dist": true,
+    ".astro": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "dist": true,
+    ".astro": true
+  }
+}

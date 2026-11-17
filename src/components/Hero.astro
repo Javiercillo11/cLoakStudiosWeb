@@ -82,7 +82,7 @@ import { services } from '../data/services';
 
   .hero__inner {
     display: grid;
-    gap: var(--space-10);
+    gap: var(--space-12);
     align-items: center;
   }
 
@@ -120,7 +120,7 @@ import { services } from '../data/services';
   }
 
   .hero__visual {
-    width: min(100%, 22rem);
+    width: min(62vw, 15rem);
     margin-inline: auto;
     opacity: 0.95;
   }
@@ -166,9 +166,10 @@ import { services } from '../data/services';
     }
 
     .hero__visual {
-      width: 100%;
-      max-width: 30rem;
-      margin-right: -2rem;
+      width: 92%;
+      max-width: 28rem;
+      margin-right: 0;
+      padding-right: 1.5rem; /* margen para los pliegues, que sobresalen del círculo */
     }
 
     .hero__index {
