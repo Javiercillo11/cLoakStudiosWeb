@@ -1,6 +1,6 @@
 # cLoak Studios — web comercial
 
-Web de [cloakstudio.app](https://cloakstudio.app): presentación de los tres servicios (páginas web, aplicaciones de gestión y QR para reseñas) y formulario inteligente de solicitud de presupuesto.
+Web de [cloakstudios.app](https://cloakstudios.app): presentación de los tres servicios (páginas web, aplicaciones de gestión y QR para reseñas) y formulario inteligente de solicitud de presupuesto.
 
 - **Stack:** [Astro 7](https://astro.build) + TypeScript, salida 100 % estática (GitHub Pages).
 - **Estilos:** CSS propio con design tokens (`src/styles/tokens.css`). Sin frameworks CSS.
@@ -66,8 +66,8 @@ El workflow pregunta a GitHub (`actions/configure-pages`) dónde se publica la w
 
 1. **Settings → Pages → Source:** «GitHub Actions».
 2. **Settings → Secrets and variables → Actions → Variables:** crear `PUBLIC_WEB3FORMS_ACCESS_KEY`.
-3. **Dominio:** `public/CNAME` ya contiene `cloakstudio.app`. En el DNS del dominio, apuntar los registros `A`/`AAAA` del apex a las IP de GitHub Pages (o un `ALIAS`/`ANAME`) y activar «Enforce HTTPS».
-4. En el panel de Web3Forms, restringir los envíos al dominio `cloakstudio.app`.
+3. **Dominio:** `public/CNAME` ya contiene `cloakstudios.app`. En el DNS del dominio, apuntar los registros `A`/`AAAA` del apex a las IP de GitHub Pages (o un `ALIAS`/`ANAME`) y activar «Enforce HTTPS».
+4. En el panel de Web3Forms, restringir los envíos al dominio `cloakstudios.app`.
 
 > En el plan gratuito de GitHub, Pages requiere que el repositorio sea público.
 

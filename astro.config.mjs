@@ -4,8 +4,8 @@ import sitemap from '@astrojs/sitemap';
 
 // En CI, actions/configure-pages proporciona el origen y el prefijo reales:
 //   - github.io sin dominio:  SITE_URL=https://<usuario>.github.io  BASE_PATH=/<repo>
-//   - con dominio propio:     SITE_URL=https://cloakstudio.app      BASE_PATH=(vacío)
-const site = process.env.SITE_URL || 'https://cloakstudio.app';
+//   - con dominio propio:     SITE_URL=https://cloakstudios.app      BASE_PATH=(vacío)
+const site = process.env.SITE_URL || 'https://cloakstudios.app';
 const base = process.env.BASE_PATH || '/';
 
 export default defineConfig({

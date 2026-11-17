@@ -1,6 +1,6 @@
 CLOAK STUDIO — Web comercial y plan de implementación
 
-Dominio: https://cloakstudio.app
+Dominio: https://cloakstudios.app
 Proyecto: Web comercial de Cloak Studio
 Versión: 1.0
 Objetivo principal: convertir visitas de negocios en solicitudes de presupuesto cualificadas.
