@@ -1,0 +1,112 @@
+---
+import Logo from './Logo.astro';
+import { site } from '../data/site';
+
+const isHome = Astro.url.pathname === '/' || Astro.url.pathname === '';
+const link = (href: string) => (isHome ? href : `/${href}`);
+const year = new Date().getFullYear();
+const links = [
+  { label: 'Inicio', href: link('#inicio') },
+  { label: 'Servicios', href: link('#servicios') },
+  { label: 'Contacto', href: link('#contacto') },
+];
+---
+
+<footer class="site-footer">
+  <div class="container site-footer__grid">
+    <div class="site-footer__brand">
+      <Logo href={link('#inicio')} size={30} />
+      <p class="site-footer__tagline">{site.tagline}</p>
+    </div>
+
+    <nav aria-label="Pie de página" class="site-footer__nav">
+      <ul role="list">
+        {links.map((l) => (
+          <li><a href={l.href}>{l.label}</a></li>
+        ))}
+        {site.email && (
+          <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
+        )}
+        {site.social.map((s) => (
+          <li><a href={s.href} rel="me noopener" target="_blank">{s.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+
+  <div class="container site-footer__bottom">
+    <p>© <span data-year>{year}</span> {site.name}</p>
+    <ul role="list" class="site-footer__legal">
+      <li><a href="/privacidad">Política de privacidad</a></li>
+      {site.legalNoticeHref && <li><a href={site.legalNoticeHref}>Aviso legal</a></li>}
+    </ul>
+  </div>
+</footer>
+
+<script>
+  // Año dinámico: el HTML estático trae el año del build y se actualiza en cliente.
+  document.querySelectorAll('[data-year]').forEach((el) => (el.textContent = String(new Date().getFullYear())));
+</script>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--color-line);
+    padding-block: var(--space-16) var(--space-8);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .site-footer__grid {
+    display: grid;
+    gap: var(--space-10);
+  }
+
+  .site-footer__tagline {
+    margin-top: var(--space-4);
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    color: var(--text);
+    letter-spacing: -0.01em;
+    max-width: 22ch;
+  }
+
+  .site-footer__nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+  }
+
+  a {
+    text-decoration: none;
+    transition: color var(--duration-fast) ease;
+  }
+
+  .site-footer a:hover {
+    color: var(--text);
+  }
+
+  .site-footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-top: var(--space-16);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--color-line);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+  }
+
+  .site-footer__legal {
+    display: flex;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 48rem) {
+    .site-footer__grid {
+      grid-template-columns: 1fr auto;
+      align-items: end;
+    }
+  }
+</style>

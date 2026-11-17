@@ -1,0 +1,261 @@
+---
+import '../styles/form.css';
+import Field from './form/Field.astro';
+import ChoiceGroup from './form/ChoiceGroup.astro';
+import Icon from './Icon.astro';
+import { LIMITS, MESSAGE_MIN, OPTIONS, SERVICE_IDS, SERVICE_LABELS } from '../lib/contact/schema';
+import { resolveMode, WEB3FORMS_ENDPOINT } from '../lib/contact/submit';
+
+const accessKey = import.meta.env.PUBLIC_WEB3FORMS_ACCESS_KEY;
+const mode = resolveMode(accessKey, import.meta.env.DEV);
+
+if (mode === 'disabled') {
+  console.warn(
+    '\n[contacto] PUBLIC_WEB3FORMS_ACCESS_KEY no está definida: el formulario se publicará con el envío desactivado.\n',
+  );
+}
+
+const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
+  web: 'Nueva web o renovación',
+  app: 'Software a medida para tu día a día',
+  qr: 'Acceso directo a tus reseñas',
+  otro: 'Te ayudamos a definirlo',
+};
+---
+
+<form
+  class="contact-form"
+  id="contact-form"
+  data-contact-form
+  data-mode={mode}
+  method="post"
+  action={mode === 'live' ? WEB3FORMS_ENDPOINT : undefined}
+  aria-labelledby="contact-title"
+>
+  {
+    mode === 'test' && (
+      <div class="notice notice--test" role="note">
+        <span class="notice__tag">Modo prueba</span>
+        <p>
+          Falta <code>PUBLIC_WEB3FORMS_ACCESS_KEY</code>. El formulario valida los datos y muestra la solicitud en la
+          consola del navegador, pero <strong>no envía ningún email</strong>.
+        </p>
+      </div>
+    )
+  }
+  {
+    mode === 'disabled' && (
+      <div class="notice notice--warn" role="note">
+        <Icon name="alert" size={20} />
+        <p>
+          El envío online de solicitudes todavía no está activo. Estamos terminando de configurarlo; vuelve a intentarlo
+          en unos días.
+        </p>
+      </div>
+    )
+  }
+
+  {
+    mode === 'live' && (
+      <>
+        <input type="hidden" name="access_key" value={accessKey} />
+        <input type="hidden" name="subject" value="Nueva solicitud desde Cloak Studio" />
+      </>
+    )
+  }
+
+  <!-- 1. Servicio -->
+  <fieldset class="service-picker" id="cf-service" aria-describedby="cf-service-error" data-field="cf-service">
+    <legend class="field__label">
+      <span>¿Qué servicio te interesa?</span>
+      <span class="field__req">obligatorio</span>
+    </legend>
+    <div class="service-picker__grid">
+      {
+        SERVICE_IDS.map((id) => (
+          <label class="service-option">
+            <input type="radio" name="service" value={id} required class="service-option__input" />
+            <span class="service-option__dot" aria-hidden="true" />
+            <span class="service-option__text">
+              <span class="service-option__title">{SERVICE_LABELS[id]}</span>
+              <span class="service-option__hint">{serviceHints[id]}</span>
+            </span>
+          </label>
+        ))
+      }
+    </div>
+    <p class="field__error" id="cf-service-error" data-error-for="cf-service" hidden></p>
+  </fieldset>
+
+  <!-- 2. Datos de contacto -->
+  <div class="form-grid">
+    <Field id="cf-name" name="name" label="Nombre" required autocomplete="name" maxlength={LIMITS.name} />
+    <Field
+      id="cf-business"
+      name="business"
+      label="Nombre del negocio"
+      conditionalRequired
+      autocomplete="organization"
+      maxlength={LIMITS.business}
+    />
+    <Field
+      id="cf-email"
+      name="email"
+      label="Email"
+      type="email"
+      required
+      autocomplete="email"
+      inputmode="email"
+      maxlength={LIMITS.email}
+      placeholder="nombre@negocio.com"
+    />
+    <Field
+      id="cf-phone"
+      name="phone"
+      label="Teléfono"
+      type="tel"
+      autocomplete="tel"
+      inputmode="tel"
+      maxlength={LIMITS.phone}
+    />
+  </div>
+
+  <!-- 3. Bloques dinámicos por servicio -->
+  <fieldset class="service-block" data-service-block="web">
+    <legend class="service-block__legend">Sobre tu página web</legend>
+    <div class="service-block__body">
+      <ChoiceGroup name="web_has_site" legend="¿Tienes una web actualmente?" type="radio" options={OPTIONS.webHasSite} />
+      <ChoiceGroup name="web_needs" legend="¿Qué necesitas?" type="checkbox" options={OPTIONS.webNeeds} />
+      <div class="form-grid">
+        <Field
+          id="cf-web-type"
+          name="web_business_type"
+          label="Tipo de negocio"
+          maxlength={LIMITS.webBusinessType}
+          placeholder="Restaurante, clínica, tienda…"
+        />
+        <Field
+          id="cf-web-url"
+          name="web_current_url"
+          label="URL actual"
+          type="url"
+          inputmode="url"
+          autocomplete="url"
+          maxlength={LIMITS.url}
+          placeholder="minegocio.es"
+        />
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset class="service-block" data-service-block="app">
+    <legend class="service-block__legend">Sobre tu aplicación</legend>
+    <div class="service-block__body">
+      <ChoiceGroup name="app_manage" legend="¿Qué necesitas gestionar?" type="checkbox" options={OPTIONS.appManage} />
+      <ChoiceGroup name="app_users" legend="¿Cuántas personas la utilizarían?" type="radio" options={OPTIONS.appUsers} />
+      <Field
+        id="cf-app-tool"
+        name="app_current_tool"
+        label="¿Utilizas actualmente alguna herramienta?"
+        maxlength={LIMITS.appCurrentTool}
+        placeholder="Excel, papel, otra aplicación…"
+      />
+      <Field
+        id="cf-app-simplify"
+        name="app_simplify"
+        label="¿Qué tarea te gustaría simplificar?"
+        type="textarea"
+        rows={3}
+        maxlength={LIMITS.appSimplify}
+      />
+    </div>
+  </fieldset>
+
+  <fieldset class="service-block" data-service-block="qr">
+    <legend class="service-block__legend">Sobre tu QR de reseñas</legend>
+    <div class="service-block__body">
+      <Field
+        id="cf-qr-url"
+        name="qr_review_url"
+        label="Enlace a tu página de reseñas"
+        type="url"
+        inputmode="url"
+        maxlength={LIMITS.url}
+        placeholder="https://…"
+        hint="Si aún no lo tienes, puedes dejarlo vacío: lo necesitaremos antes de generar el QR final."
+      />
+      <ChoiceGroup name="qr_platform" legend="Plataforma" type="radio" options={OPTIONS.qrPlatform} />
+      <ChoiceGroup name="qr_placement" legend="¿Dónde utilizarás el QR?" type="checkbox" options={OPTIONS.qrPlacement} />
+    </div>
+  </fieldset>
+
+  <!-- 4. Descripción -->
+  <Field
+    id="cf-message"
+    name="message"
+    label="Cuéntanos sobre tu proyecto"
+    type="textarea"
+    required
+    rows={5}
+    minlength={MESSAGE_MIN}
+    maxlength={LIMITS.message}
+    counter
+    placeholder="¿Qué necesitas? ¿Qué te gustaría conseguir?"
+  />
+
+  <!-- Honeypot anti-spam: invisible para personas y tecnologías de apoyo -->
+  <div class="hp" aria-hidden="true">
+    <label for="cf-botcheck">No rellenes este campo</label>
+    <input type="checkbox" id="cf-botcheck" name="botcheck" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <!-- 5. Privacidad -->
+  <div class="consent" data-field="cf-privacy">
+    <label class="consent__label">
+      <input
+        type="checkbox"
+        id="cf-privacy"
+        name="privacy"
+        required
+        aria-required="true"
+        aria-describedby="cf-privacy-error"
+        class="consent__input"
+      />
+      <span class="consent__box" aria-hidden="true"><Icon name="check" size={14} /></span>
+      <span>
+        He leído y acepto la <a href="/privacidad" target="_blank" rel="noopener">política de privacidad</a>.{' '}
+        <span class="field__req">obligatorio</span>
+      </span>
+    </label>
+    <p class="field__error" id="cf-privacy-error" data-error-for="cf-privacy" hidden></p>
+  </div>
+
+  <!-- Estado del envío (anunciado por lectores de pantalla) -->
+  <div class="form-alert" data-form-alert role="alert" hidden></div>
+
+  <div class="form-actions">
+    <button type="submit" class="submit" data-submit disabled={mode === 'disabled'}>
+      <span class="submit__spinner" aria-hidden="true"></span>
+      <span data-submit-label>Enviar solicitud</span>
+      <Icon name="arrow-right" size={18} />
+    </button>
+    <p class="form-microcopy">
+      Tus datos se utilizarán únicamente para gestionar tu consulta, de acuerdo con la{' '}
+      <a href="/privacidad" target="_blank" rel="noopener">política de privacidad</a>.
+    </p>
+  </div>
+</form>
+
+<!-- Confirmación: solo se muestra tras la respuesta afirmativa del servicio de envío -->
+<div class="form-success" data-form-success tabindex="-1" hidden>
+  <span class="form-success__icon" aria-hidden="true"><Icon name="check" size={26} /></span>
+  <p class="form-success__tag" data-success-test hidden>Modo prueba · no se ha enviado ningún email</p>
+  <h3 class="form-success__title">¡Gracias por contactar con Cloak Studio!</h3>
+  <p>Hemos recibido tu solicitud. Revisaremos la información y nos pondremos en contacto contigo.</p>
+  <button type="button" class="btn-reset" data-form-reset>Enviar otra solicitud</button>
+</div>
+
+<script>
+  import { initContactForm } from '../scripts/contact-form';
+  initContactForm();
+</script>

@@ -1,0 +1,65 @@
+---
+import { Image } from 'astro:assets';
+import logoMark from '../assets/brand/logo-mark.png';
+
+interface Props {
+  /** Tamaño del símbolo en px. */
+  size?: number;
+  /** Muestra el wordmark junto al símbolo. */
+  wordmark?: boolean;
+  href?: string;
+  class?: string;
+}
+
+const { size = 34, wordmark = true, href = '/', class: className } = Astro.props;
+---
+
+<a href={href} class:list={['logo', className]} aria-label="Cloak Studio — inicio">
+  <Image
+    src={logoMark}
+    alt=""
+    width={size}
+    height={size}
+    densities={[1, 2]}
+    format="webp"
+    loading="eager"
+    class="logo__mark"
+  />
+  {
+    wordmark && (
+      <span class="logo__word" aria-hidden="true">
+        Cloak<span class="logo__studio">Studio</span>
+      </span>
+    )
+  }
+</a>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    text-decoration: none;
+    color: var(--text);
+    border-radius: 10px;
+  }
+
+  .logo__mark {
+    border-radius: 24%;
+    flex: none;
+  }
+
+  .logo__word {
+    font-family: var(--font-brand);
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .logo__studio {
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-left: 0.28em;
+  }
+</style>

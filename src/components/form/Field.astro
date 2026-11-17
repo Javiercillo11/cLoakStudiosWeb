@@ -1,0 +1,110 @@
+---
+// Campo de texto/textarea accesible con etiqueta, ayuda y mensaje de error.
+interface Props {
+  id: string;
+  name: string;
+  label: string;
+  type?: 'text' | 'email' | 'tel' | 'url' | 'textarea';
+  required?: boolean;
+  /** Muestra la marca de obligatorio pero sin `required` nativo (lo controla JS según el servicio). */
+  conditionalRequired?: boolean;
+  autocomplete?: string;
+  inputmode?: 'text' | 'email' | 'tel' | 'url';
+  maxlength: number;
+  minlength?: number;
+  placeholder?: string;
+  hint?: string;
+  rows?: number;
+  counter?: boolean;
+  class?: string;
+}
+
+const {
+  id,
+  name,
+  label,
+  type = 'text',
+  required = false,
+  conditionalRequired = false,
+  autocomplete,
+  inputmode,
+  maxlength,
+  minlength,
+  placeholder,
+  hint,
+  rows = 5,
+  counter = false,
+  class: className,
+} = Astro.props;
+
+const hintId = hint ? `${id}-hint` : undefined;
+const errorId = `${id}-error`;
+const describedBy = [hintId, errorId].filter(Boolean).join(' ');
+---
+
+<div class:list={['field', className]} data-field={id}>
+  <label class="field__label" for={id}>
+    <span data-label-text>{label}</span>
+    {
+      required ? (
+        <span class="field__req">obligatorio</span>
+      ) : conditionalRequired ? (
+        <>
+          <span class="field__req" data-conditional-req hidden>
+            obligatorio
+          </span>
+          <span class="field__opt" data-optional-tag>
+            opcional
+          </span>
+        </>
+      ) : (
+        <span class="field__opt" data-optional-tag>
+          opcional
+        </span>
+      )
+    }
+  </label>
+  {
+    type === 'textarea' ? (
+      <textarea
+        class="control control--area"
+        id={id}
+        name={name}
+        rows={rows}
+        maxlength={maxlength}
+        minlength={minlength}
+        required={required}
+        aria-required={required ? 'true' : undefined}
+        placeholder={placeholder}
+        aria-describedby={describedBy}
+      />
+    ) : (
+      <input
+        class="control"
+        id={id}
+        name={name}
+        type={type}
+        maxlength={maxlength}
+        minlength={minlength}
+        required={required}
+        aria-required={required ? 'true' : undefined}
+        autocomplete={autocomplete}
+        inputmode={inputmode}
+        placeholder={placeholder}
+        aria-describedby={describedBy}
+        spellcheck={type === 'email' || type === 'url' ? 'false' : undefined}
+      />
+    )
+  }
+  <div class="field__meta">
+    {hint && <p class="field__hint" id={hintId}>{hint}</p>}
+    {
+      counter && (
+        <p class="field__counter" aria-hidden="true">
+          <span data-counter-for={id}>0</span> / {maxlength}
+        </p>
+      )
+    }
+  </div>
+  <p class="field__error" id={errorId} data-error-for={id} hidden></p>
+</div>

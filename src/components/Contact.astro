@@ -1,0 +1,145 @@
+---
+import ContactForm from './ContactForm.astro';
+import Icon from './Icon.astro';
+import { site } from '../data/site';
+
+const next = [
+  'Revisamos tu solicitud y el servicio que has elegido.',
+  'Te escribimos al email que nos indiques para concretar detalles.',
+  'Si encaja, preparamos una propuesta con alcance y plazos.',
+];
+---
+
+<section class="section contact" id="contacto" aria-labelledby="contact-title">
+  <div class="contact__glow" aria-hidden="true"></div>
+  <div class="container contact__grid">
+    <div class="contact__intro" data-reveal>
+      <p class="eyebrow">Contacto</p>
+      <h2 id="contact-title">Hablemos de tu proyecto.</h2>
+      <p class="lead">
+        Cuéntanos qué necesitas. Revisaremos tu solicitud y nos pondremos en contacto contigo para hablar de los
+        siguientes pasos.
+      </p>
+
+      <div class="contact__next">
+        <p class="contact__next-title">Qué pasa después</p>
+        <ol role="list">
+          {
+            next.map((t, i) => (
+              <li>
+                <span aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                {t}
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+
+      {
+        site.email && (
+          <a class="contact__mail" href={`mailto:${site.email}`}>
+            <Icon name="mail" size={20} />
+            {site.email}
+          </a>
+        )
+      }
+    </div>
+
+    <div class="contact__panel" data-reveal style="--reveal-delay:120ms">
+      <ContactForm />
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact {
+    isolation: isolate;
+    overflow: clip;
+  }
+
+  .contact__glow {
+    position: absolute;
+    z-index: -1;
+    inset: 10% -30% auto auto;
+    width: 60rem;
+    height: 40rem;
+    background: radial-gradient(closest-side, rgb(139 92 246 / 0.14), transparent);
+    pointer-events: none;
+  }
+
+  .contact__grid {
+    display: grid;
+    gap: var(--space-12);
+  }
+
+  .contact__intro {
+    display: grid;
+    gap: var(--space-5);
+    align-content: start;
+  }
+
+  .contact__next {
+    margin-top: var(--space-6);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--color-line);
+  }
+
+  .contact__next-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .contact__next ol {
+    display: grid;
+    gap: var(--space-4);
+    margin-top: var(--space-5);
+  }
+
+  .contact__next li {
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .contact__next li span {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-violet-text);
+    padding-top: 0.15rem;
+  }
+
+  .contact__mail {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .contact__panel {
+    padding: clamp(1.25rem, 0.8rem + 2.5vw, 2.5rem);
+    background: var(--surface);
+    border: 1px solid var(--color-line);
+    border-radius: calc(var(--radius-card) + 0.5rem);
+    box-shadow: var(--shadow-card);
+  }
+
+  @media (min-width: 64rem) {
+    .contact__grid {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+      gap: var(--space-16);
+      align-items: start;
+    }
+
+    .contact__intro {
+      position: sticky;
+      top: calc(var(--header-height) + var(--space-10));
+    }
+  }
+</style>

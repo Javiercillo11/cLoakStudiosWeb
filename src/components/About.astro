@@ -1,0 +1,127 @@
+---
+import Icon, { type Name } from './Icon.astro';
+import { pillars } from '../data/services';
+
+const icons: Name[] = ['compass', 'layers', 'spark', 'message'];
+---
+
+<section class="section about" id="estudio" aria-labelledby="about-title">
+  <div class="container about__grid">
+    <div class="about__intro" data-reveal>
+      <p class="eyebrow">Por qué Cloak Studio</p>
+      <h2 id="about-title">Tecnología con propósito.</h2>
+      <p class="lead">
+        Somos un estudio independiente centrado en crear soluciones digitales útiles, claras y bien construidas.
+        Combinamos diseño y desarrollo para que la tecnología trabaje a favor de tu negocio.
+      </p>
+      <blockquote class="about__quote">
+        <p>Build beyond the visible.</p>
+      </blockquote>
+    </div>
+
+    <ul role="list" class="pillars">
+      {
+        pillars.map((p, i) => (
+          <li class="pillar" data-reveal style={`--reveal-delay:${i * 70}ms`}>
+            <span class="pillar__icon">
+              <Icon name={icons[i]} size={22} />
+            </span>
+            <h3 class="pillar__title">{p.title}</h3>
+            <p class="pillar__text">{p.text}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .about__grid {
+    display: grid;
+    gap: var(--space-12);
+  }
+
+  .about__intro {
+    display: grid;
+    gap: var(--space-5);
+    align-content: start;
+  }
+
+  .about__quote {
+    margin: var(--space-6) 0 0;
+    font-family: var(--font-brand);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--color-soft-lavender);
+  }
+
+  .about__quote p::before {
+    content: '— ';
+    color: var(--text-muted);
+  }
+
+  .pillars {
+    display: grid;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .pillar {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: var(--space-5);
+    row-gap: var(--space-1);
+    padding-block: var(--space-6);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .pillar__icon {
+    grid-row: span 2;
+    color: var(--color-soft-lavender);
+    padding-top: 0.15rem;
+  }
+
+  .pillar__title {
+    font-size: var(--text-lg);
+    letter-spacing: -0.015em;
+  }
+
+  .pillar__text {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+
+  @media (min-width: 40rem) {
+    .pillars {
+      grid-template-columns: 1fr 1fr;
+      border-top: 0;
+      gap: 0;
+    }
+
+    .pillar {
+      grid-template-columns: 1fr;
+      row-gap: var(--space-3);
+      padding: var(--space-8) var(--space-6) var(--space-8) 0;
+      border-top: 1px solid var(--color-line);
+      border-bottom: 0;
+    }
+
+    .pillar:nth-child(even) {
+      padding-left: var(--space-6);
+      border-left: 1px solid var(--color-line);
+    }
+
+    .pillar__icon {
+      grid-row: auto;
+      margin-bottom: var(--space-3);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .about__grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+      gap: var(--space-20);
+      align-items: start;
+    }
+  }
+</style>

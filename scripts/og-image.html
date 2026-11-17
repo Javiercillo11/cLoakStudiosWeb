@@ -1,0 +1,32 @@
+<!doctype html>
+<!-- Plantilla de la imagen Open Graph (1200×630). Se renderiza con un navegador
+     headless desde la raíz del proyecto y se guarda en public/og-image.png. -->
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<style>
+  @font-face { font-family: 'SG'; src: url('../node_modules/@fontsource-variable/space-grotesk/files/space-grotesk-latin-wght-normal.woff2') format('woff2'); font-weight: 300 700; }
+  @font-face { font-family: 'PJ'; src: url('../node_modules/@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2') format('woff2'); font-weight: 200 800; }
+  @font-face { font-family: 'JM'; src: url('../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2') format('woff2'); font-weight: 100 800; }
+  html, body { margin: 0; }
+  body { width: 1200px; height: 630px; background: #09090B; color: #F4F4F5; position: relative; overflow: hidden; font-family: 'SG', sans-serif; }
+  .glow { position: absolute; inset: auto -10% -55% -10%; height: 90%; background: radial-gradient(50% 55% at 50% 100%, rgba(139,92,246,.45), transparent 70%); }
+  .wrap { position: absolute; inset: 72px 80px; display: flex; flex-direction: column; }
+  .brand { display: flex; align-items: center; gap: 18px; font-family: 'PJ'; font-size: 30px; font-weight: 700; letter-spacing: -0.02em; }
+  .brand img { width: 64px; height: 64px; border-radius: 24%; }
+  .brand span { font-weight: 400; color: #A1A1AA; }
+  h1 { margin: auto 0 0; font-size: 76px; line-height: 1.02; letter-spacing: -0.045em; font-weight: 600; max-width: 900px; }
+  h1 em { font-style: normal; color: #C4B5FD; }
+  .meta { margin-top: 36px; display: flex; gap: 28px; font-family: 'JM'; font-size: 18px; letter-spacing: .1em; text-transform: uppercase; color: #A78BFA; }
+  .meta b { color: #52525B; font-weight: 400; }
+</style>
+</head>
+<body>
+  <div class="glow"></div>
+  <div class="wrap">
+    <div class="brand"><img src="../src/assets/brand/logo-mark.png" alt="" />Cloak<span>Studio</span></div>
+    <h1>Digitalizamos tu negocio. <em>Construimos lo que viene.</em></h1>
+    <div class="meta">Páginas web <b>/</b> Apps de gestión <b>/</b> QR para reseñas</div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import Services from '../components/Services.astro';
+import Process from '../components/Process.astro';
+import About from '../components/About.astro';
+import Contact from '../components/Contact.astro';
+import { site } from '../data/site';
+import { services } from '../data/services';
+
+// Solo datos veraces: nombre, URL, descripción y servicios ofrecidos.
+// Sin dirección, teléfono, valoraciones ni datos de empresa sin confirmar.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${site.url}/#website`,
+      url: site.url,
+      name: site.name,
+      inLanguage: 'es',
+    },
+    {
+      '@type': 'ProfessionalService',
+      '@id': `${site.url}/#studio`,
+      name: site.name,
+      url: site.url,
+      description: site.description,
+      logo: `${site.url}/icon-512.png`,
+      hasOfferCatalog: {
+        '@type': 'OfferCatalog',
+        name: 'Servicios',
+        itemListElement: services.map((s) => ({
+          '@type': 'Offer',
+          itemOffered: { '@type': 'Service', name: s.title, description: s.description },
+        })),
+      },
+    },
+  ],
+};
+---
+
+<BaseLayout jsonLd={jsonLd}>
+  <Hero />
+  <Services />
+  <Process />
+  <About />
+  <Contact />
+</BaseLayout>

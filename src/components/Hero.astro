@@ -1,0 +1,192 @@
+---
+import Button from './Button.astro';
+import Icon from './Icon.astro';
+import HeroRibbon from './HeroRibbon.astro';
+import { services } from '../data/services';
+---
+
+<section class="hero" id="inicio" aria-labelledby="hero-title">
+  <div class="hero__glow" aria-hidden="true"></div>
+
+  <div class="container hero__inner">
+    <div class="hero__copy">
+      <p class="eyebrow">Estudio independiente de desarrollo digital</p>
+      <h1 id="hero-title" class="hero__title">
+        Digitalizamos tu negocio. <span class="hero__accent">Construimos lo que viene.</span>
+      </h1>
+      <p class="hero__lead">
+        Creamos páginas web, aplicaciones de gestión y soluciones digitales para ayudar a los negocios a trabajar mejor y
+        crecer.
+      </p>
+      <div class="hero__actions">
+        <Button href="#servicios" size="lg">
+          Explorar servicios
+          <Icon name="arrow-down" size={18} />
+        </Button>
+        <Button href="#contacto" variant="secondary" size="lg">Cuéntanos tu proyecto</Button>
+      </div>
+    </div>
+
+    <div class="hero__visual">
+      <HeroRibbon />
+    </div>
+  </div>
+
+  <div class="container">
+    <ul role="list" class="hero__index" aria-label="Servicios">
+      {
+        services.map((s) => (
+          <li>
+            <a href={`#${s.slug}`}>
+              <span class="hero__index-num">{s.number}</span>
+              {s.title}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+    margin-top: calc(var(--header-height) * -1);
+    padding-top: calc(var(--header-height) + clamp(3rem, 2rem + 6vw, 7rem));
+    padding-bottom: var(--space-10);
+  }
+
+  /* Horizonte violeta sutil en la base del hero */
+  .hero__glow {
+    position: absolute;
+    inset: auto -20% -38% -20%;
+    height: 70%;
+    z-index: -1;
+    background:
+      radial-gradient(50% 55% at 50% 100%, rgb(139 92 246 / 0.32), transparent 70%),
+      radial-gradient(35% 40% at 70% 90%, rgb(196 181 253 / 0.12), transparent 70%);
+    filter: blur(10px);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 1px;
+    z-index: -1;
+    background: linear-gradient(90deg, transparent, rgb(196 181 253 / 0.22), transparent);
+  }
+
+  .hero__inner {
+    display: grid;
+    gap: var(--space-10);
+    align-items: center;
+  }
+
+  .hero__copy {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero__title {
+    margin-top: var(--space-6);
+    font-size: var(--text-3xl);
+    font-weight: 600;
+    line-height: var(--leading-tight);
+    letter-spacing: -0.045em;
+    max-width: 14ch;
+  }
+
+  .hero__accent {
+    display: block;
+    color: var(--color-soft-lavender);
+  }
+
+  .hero__lead {
+    margin-top: var(--space-6);
+    max-width: 34rem;
+    font-size: var(--text-lg);
+    color: var(--text-muted);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-10);
+  }
+
+  .hero__visual {
+    width: min(100%, 22rem);
+    margin-inline: auto;
+    opacity: 0.95;
+  }
+
+  .hero__index {
+    display: grid;
+    margin-top: clamp(3rem, 2rem + 5vw, 6rem);
+    border-top: 1px solid var(--color-line);
+  }
+
+  .hero__index a {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-line);
+    transition: color var(--duration-fast) ease;
+  }
+
+  .hero__index a:hover {
+    color: var(--text);
+  }
+
+  .hero__index-num {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-violet-text);
+  }
+
+  @media (min-width: 40rem) {
+    .hero__actions {
+      flex-wrap: nowrap;
+    }
+  }
+
+  @media (min-width: 56rem) {
+    .hero__inner {
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+      gap: var(--space-8);
+    }
+
+    .hero__visual {
+      width: 100%;
+      max-width: 30rem;
+      margin-right: -2rem;
+    }
+
+    .hero__index {
+      grid-template-columns: repeat(3, 1fr);
+      border-bottom: 1px solid var(--color-line);
+    }
+
+    .hero__index a {
+      border-bottom: 0;
+      padding-inline: var(--space-6);
+    }
+
+    .hero__index li + li a {
+      border-left: 1px solid var(--color-line);
+    }
+
+    .hero__index li:first-child a {
+      padding-left: 0;
+    }
+  }
+</style>

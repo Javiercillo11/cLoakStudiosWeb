@@ -1,0 +1,32 @@
+---
+// Grupo de opciones (radio o checkbox) mostrado como «chips» accesibles.
+interface Props {
+  name: string;
+  legend: string;
+  type: 'radio' | 'checkbox';
+  options: Record<string, string>;
+  hint?: string;
+}
+
+const { name, legend, type, options, hint } = Astro.props;
+const idBase = `cf-${name.replace(/_/g, '-')}`;
+---
+
+<fieldset class="choices" aria-describedby={hint ? `${idBase}-hint` : undefined}>
+  <legend class="field__label">
+    <span>{legend}</span>
+    <span class="field__opt">{type === 'checkbox' ? 'opcional · varias opciones' : 'opcional'}</span>
+  </legend>
+  {hint && <p class="field__hint" id={`${idBase}-hint`}>{hint}</p>}
+  <div class="choices__list">
+    {
+      Object.entries(options).map(([value, text]) => (
+        <label class="chip">
+          <input type={type} name={name} value={value} class="chip__input" />
+          <span class="chip__box" aria-hidden="true" />
+          <span>{text}</span>
+        </label>
+      ))
+    }
+  </div>
+</fieldset>
