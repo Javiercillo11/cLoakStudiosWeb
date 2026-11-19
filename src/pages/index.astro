@@ -1,6 +1,7 @@
 ---
 import { absoluteUrl } from '../lib/paths';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Cosmos from '../components/Cosmos.astro';
 import Hero from '../components/Hero.astro';
 import Services from '../components/Services.astro';
 import Process from '../components/Process.astro';
@@ -42,9 +43,11 @@ const jsonLd = {
 ---
 
 <BaseLayout jsonLd={jsonLd}>
-  <Hero />
-  <Services />
-  <Process />
-  <About />
-  <Contact />
+  <Cosmos>
+    <Hero />
+    <Services />
+    <Process />
+    <About />
+    <Contact />
+  </Cosmos>
 </BaseLayout>

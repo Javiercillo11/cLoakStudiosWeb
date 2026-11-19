@@ -8,6 +8,8 @@ export interface Service {
   number: string;
   icon: IconName;
   title: string;
+  /** Título partido en dos líneas para la tarjeta. */
+  titleLines: [string, string];
   description: string;
   listTitle: string;
   items: string[];
@@ -22,6 +24,7 @@ export const services: Service[] = [
     number: '01',
     icon: 'monitor',
     title: 'Páginas web para negocios',
+    titleLines: ['Páginas web', 'para negocios'],
     description:
       'Una web profesional que transmite confianza, presenta tus servicios y ayuda a convertir visitas en nuevos clientes.',
     listTitle: 'Qué incluye',
@@ -40,6 +43,7 @@ export const services: Service[] = [
     number: '02',
     icon: 'dashboard',
     title: 'Aplicaciones para gestionar tu negocio',
+    titleLines: ['Aplicaciones para', 'gestionar tu negocio'],
     description:
       'Aplicaciones a medida para organizar el día a día de tu negocio, centralizar información y automatizar tareas.',
     listTitle: 'Posibles funcionalidades',
@@ -61,6 +65,7 @@ export const services: Service[] = [
     number: '03',
     icon: 'qr',
     title: 'QR para conseguir reseñas',
+    titleLines: ['QR para', 'conseguir reseñas'],
     description:
       'Facilita que tus clientes lleguen a tu página de reseñas con un código QR personalizado para tu negocio.',
     listTitle: 'Qué incluye',

@@ -8,6 +8,11 @@
 
   /* ── Paleta de marca ─────────────────────────────── */
   --color-obsidian: #09090b;
+  --color-space: #030208; /* negro espacial de la referencia */
+  --color-electric: #8a3dff; /* violeta eléctrico de los botones (medido: #7734fd–#8433fb) */
+  --color-electric-deep: #6f2cf6;
+  --color-lavender-text: #c494f3; /* antetítulos */
+  --color-copy: #d2d1dc; /* texto descriptivo sobre el espacio */
   --color-carbon: #18181b;
   --color-ghost-white: #f4f4f5;
   --color-muted: #a1a1aa;
@@ -22,6 +27,7 @@
   --color-line: rgb(244 244 245 / 0.08); /* separadores decorativos */
   --color-line-strong: rgb(244 244 245 / 0.14);
   --color-control-border: #71717a; /* bordes de controles: 3.67:1 sobre Carbon */
+  --color-control-violet: #6f62a3; /* bordes de controles sobre cristal violeta: ≥3:1 */
   --color-danger: #fca5a5;
   --color-danger-bg: rgb(248 113 113 / 0.1);
   --color-success: #86efac;
@@ -30,7 +36,7 @@
   --color-warning-bg: rgb(252 211 77 / 0.08);
 
   /* ── Semánticos ─────────────────────────────────── */
-  --bg: var(--color-obsidian);
+  --bg: var(--color-space);
   --surface: var(--color-carbon);
   --text: var(--color-ghost-white);
   --text-muted: var(--color-muted);
@@ -80,11 +86,15 @@
   --radius-control: 0.75rem;
   --radius-pill: 999px;
   --content-width: 72rem;
-  --header-height: 4.25rem;
+  --header-height: 3.5rem;
+  --frame-max: 82.5rem; /* lienzo del hero y la cabecera */
+  --frame-pad: clamp(1rem, 0.3rem + 1.6vw, 1.75rem);
+  --row-max: 64rem; /* fila de contenido dentro del lienzo */
 
   /* ── Elevación (discreta, según guía) ───────────── */
   --shadow-card: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 24px 48px -32px rgb(0 0 0 / 0.8);
   --glow-violet: 0 0 0 1px rgb(139 92 246 / 0.35), 0 18px 50px -24px rgb(139 92 246 / 0.45);
+  --glow-neon: 0 0 26px -3px rgb(122 52 252 / 0.75), 0 0 2px rgb(167 139 250 / 0.6);
 
   /* ── Movimiento ─────────────────────────────────── */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);

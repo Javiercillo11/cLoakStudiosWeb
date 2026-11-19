@@ -1,178 +1,216 @@
 ---
 import Icon from './Icon.astro';
 import ServiceVisual from './ServiceVisual.astro';
+import Nebula from './Nebula.astro';
 import { services } from '../data/services';
+
+// Ángulo del reflejo neón del borde de cada tarjeta (como en el diseño).
+const glow = ['135deg', '160deg', '205deg'];
 ---
 
-<section class="section services" id="servicios" aria-labelledby="services-title">
-  <div class="container">
-    <header class="section-head" data-reveal>
-      <p class="eyebrow">Servicios</p>
-      <h2 id="services-title">Soluciones digitales para hacer crecer tu negocio.</h2>
-      <p class="lead">Diseñamos y desarrollamos herramientas digitales que resuelven necesidades reales de tu negocio.</p>
-    </header>
+<section class="services" id="servicios" aria-labelledby="services-title" data-cosmos-anchor="services">
+  <Nebula src="left" side="left" top="-1rem" width="clamp(9rem, 15vw, 18rem)" />
+  <Nebula src="right" side="right" top="-1rem" width="clamp(11rem, 18.8vw, 22rem)" delay="-9s" />
+  <div class="frame">
+    <div class="frame__row">
+      <header class="services__head" data-reveal>
+        <h2 id="services-title">Soluciones digitales para<br /> hacer crecer tu negocio.</h2>
+        <p class="services__lead">
+          Diseñamos y desarrollamos herramientas digitales que<br class="br-wide" /> resuelven necesidades reales de tu negocio.
+        </p>
+      </header>
 
-    <ul role="list" class="services__grid">
-      {
-        services.map((s, i) => (
-          <li class="card" id={s.slug} data-reveal style={`--reveal-delay:${i * 90}ms`}>
-            <ServiceVisual id={s.id} />
-            <div class="card__head">
-              <span class="card__icon">
-                <Icon name={s.icon} size={22} />
-              </span>
-              <span class="card__num">{s.number}</span>
-            </div>
-            <h3 class="card__title">{s.title}</h3>
-            <p class="card__desc">{s.description}</p>
-            <p class="card__list-title">{s.listTitle}</p>
-            <ul role="list" class="card__list">
-              {s.items.map((item) => (
-                <li>
-                  <Icon name="check" size={16} />
-                  {item}
-                </li>
-              ))}
-            </ul>
-            {s.note && <p class="card__note">{s.note}</p>}
-            <a
-              class="card__cta"
-              href={`?servicio=${s.id}#contacto`}
-              data-service-link={s.id}
+      <ul role="list" class="services__grid">
+        {
+          services.map((s, i) => (
+            <li
+              class:list={['card neon-card', { 'card--featured': i === 0 }]}
+              id={s.slug}
+              data-reveal
+              style={`--reveal-delay:${i * 90}ms;--glow-angle:${glow[i] ?? '135deg'}`}
             >
-              {s.cta}
-              <Icon name="arrow-right" size={18} />
-            </a>
-          </li>
-        ))
-      }
-    </ul>
+              <ServiceVisual id={s.id} />
+              <div class="card__body">
+                <div class="card__head">
+                  <span class="icon-box">
+                    <Icon name={s.icon} size={18} />
+                  </span>
+                  <span class="card__num">{s.number}</span>
+                </div>
+                <h3 class="card__title">
+                  {s.titleLines[0]}
+                  <br />
+                  {s.titleLines[1]}
+                </h3>
+                <p class="card__desc">{s.description}</p>
+                <p class="card__list-title">{s.listTitle}</p>
+                <ul role="list" class="card__list">
+                  {s.items.map((item) => (
+                    <li>
+                      <Icon name="check" size={14} />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                {s.note && <p class="card__note">{s.note}</p>}
+                <a class="card__cta" href={`?servicio=${s.id}#contacto`} data-service-link={s.id}>
+                  {s.cta}
+                  <Icon name="arrow-right" size={15} />
+                </a>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
   </div>
 </section>
 
 <style>
-  .section-head {
-    display: grid;
-    gap: var(--space-5);
-    max-width: 44rem;
+  .services {
+    position: relative;
+    isolation: isolate;
+    padding-block: clamp(3.5rem, 2.5rem + 3vw, 4.5rem) clamp(2rem, 1rem + 3vw, 3.5rem);
+  }
+
+  .services__lead {
+    margin-top: var(--space-3);
+    max-width: 34rem;
+    font-size: var(--text-base);
+    color: rgb(244 244 245 / 0.68);
+  }
+
+  .br-wide {
+    display: none;
   }
 
   .services__grid {
     display: grid;
     gap: var(--space-5);
-    margin-top: clamp(2.5rem, 2rem + 3vw, 4.5rem);
+    margin-top: clamp(1.75rem, 1.25rem + 1.5vw, 2.25rem);
   }
 
   .card {
-    position: relative;
     display: flex;
     flex-direction: column;
-    padding: var(--space-3) var(--space-3) var(--space-6);
-    background: var(--surface);
-    border: 1px solid var(--color-line);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-card);
+    padding: 0.7rem;
     transition:
-      border-color var(--duration-base) ease,
       transform var(--duration-base) var(--ease-out),
+      box-shadow var(--duration-base) ease,
       opacity var(--duration-slow) var(--ease-out);
   }
 
-  .card > :not(:global(.visual)) {
-    margin-inline: var(--space-3);
+  .card--featured {
+    --edge: rgb(139 92 246 / 0.6);
+  }
+
+  .card--featured::after {
+    opacity: 0.8;
+  }
+
+  .card__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 0.5rem 1.15rem 0.15rem;
   }
 
   .card__head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: var(--space-6);
-  }
-
-  .card__icon {
-    display: grid;
-    place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    border-radius: 0.8rem;
-    color: var(--color-soft-lavender);
-    background: rgb(139 92 246 / 0.1);
-    border: 1px solid rgb(139 92 246 / 0.25);
   }
 
   .card__num {
-    font-family: var(--font-mono);
     font-size: var(--text-xs);
-    letter-spacing: var(--tracking-mono);
-    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    color: rgb(244 244 245 / 0.7);
   }
 
   .card__title {
-    margin-top: var(--space-5);
-    font-size: var(--text-xl);
+    margin-top: 0.45rem;
+    font-family: var(--font-brand);
+    font-size: 1.1875rem;
+    font-weight: 700;
+    line-height: 1.18;
+    letter-spacing: -0.005em;
+    text-wrap: initial;
   }
 
   .card__desc {
-    margin-top: var(--space-3);
-    color: var(--text-muted);
+    margin-top: 0.3rem;
+    font-size: 0.75rem;
+    line-height: 1.48;
+    color: rgb(244 244 245 / 0.7);
   }
 
   .card__list-title {
-    margin-top: var(--space-6);
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-mono);
+    margin-top: 0.8rem;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: rgb(244 244 245 / 0.62);
   }
 
   .card__list {
     display: grid;
-    gap: var(--space-2);
-    margin-top: var(--space-3);
-    font-size: var(--text-sm);
+    gap: 0.3rem;
+    margin-top: 0.4rem;
+    font-size: 0.72rem;
+    line-height: 1.38;
+    color: rgb(244 244 245 / 0.9);
   }
 
   .card__list li {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: var(--space-3);
+    gap: 0.75rem;
     align-items: start;
   }
 
   .card__list :global(svg) {
-    margin-top: 0.2em;
+    margin-top: 0.15em;
     color: var(--color-violet-text);
   }
 
   .card__note {
-    margin-top: var(--space-4);
-    padding-top: var(--space-4);
-    border-top: 1px dashed var(--color-line-strong);
-    font-size: var(--text-sm);
-    color: var(--text-muted);
+    margin-top: 0.6rem;
+    font-size: 0.72rem;
+    line-height: 1.4;
+    color: rgb(244 244 245 / 0.45);
   }
 
   .card__cta {
+    align-self: flex-start;
     display: inline-flex;
     align-items: center;
-    justify-content: space-between;
     gap: var(--space-3);
     margin-top: auto;
-    padding: 0.85rem 1.1rem;
+    padding: 0.5rem 1.1rem 0.5rem 1.25rem;
+    font-size: 0.78rem;
     font-weight: 600;
     color: var(--text);
     text-decoration: none;
-    border: 1px solid var(--color-line-strong);
-    border-radius: var(--radius-control);
+    background: rgb(9 9 11 / 0.4);
+    border: 1px solid rgb(196 181 253 / 0.3);
+    border-radius: var(--radius-pill);
     transition:
       background-color var(--duration-fast) ease,
-      border-color var(--duration-fast) ease;
+      border-color var(--duration-fast) ease,
+      box-shadow var(--duration-base) ease;
+  }
+
+  .card--featured .card__cta,
+  .card:hover .card__cta {
+    background: linear-gradient(135deg, var(--color-electric) 0%, #7734fd 50%, var(--color-electric-deep) 100%);
+    border-color: rgb(167 139 250 / 0.6);
+    box-shadow: var(--glow-neon);
   }
 
   /* Espacio mínimo entre el contenido y el CTA (el CTA siempre queda abajo) */
-  .card > :nth-last-child(2) {
-    margin-bottom: var(--space-8);
+  .card__body > :nth-last-child(2) {
+    margin-bottom: 1.25rem;
   }
 
   /* Toda la tarjeta es clicable a través del enlace (un único punto de foco). */
@@ -180,25 +218,26 @@ import { services } from '../data/services';
     content: '';
     position: absolute;
     inset: 0;
-    border-radius: inherit;
+    border-radius: 1.125rem;
   }
 
   .card__cta :global(svg) {
-    color: var(--color-soft-lavender);
     transition: transform var(--duration-fast) var(--ease-out);
   }
 
   .card:hover {
-    border-color: rgb(139 92 246 / 0.45);
+    --edge: rgb(167 139 250 / 0.7);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.08),
+      0 30px 60px -30px rgb(0 0 0 / 0.9),
+      0 0 56px -14px rgb(139 92 246 / 0.75);
   }
 
-  .card:hover .card__cta {
-    background: var(--color-violet-strong);
-    border-color: var(--color-violet-strong);
+  .card:hover::after {
+    opacity: 0.95;
   }
 
   .card:hover .card__cta :global(svg) {
-    color: #fff;
     transform: translateX(3px);
   }
 
@@ -207,50 +246,64 @@ import { services } from '../data/services';
   }
 
   .card:has(.card__cta:focus-visible) {
-    border-color: var(--color-soft-lavender);
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
   }
 
   .card__cta:focus-visible {
-    outline-offset: 2px;
+    outline: none;
   }
 
   @media (hover: hover) and (prefers-reduced-motion: no-preference) {
     .card:hover {
-      transform: translateY(-3px);
+      transform: translateY(-4px);
     }
   }
 
-  @media (min-width: 40rem) and (max-width: 71.99rem) {
+  @media (min-width: 40rem) {
+    .br-wide {
+      display: inline;
+    }
+  }
+
+  /* Móvil: el texto compacto de la referencia se agranda para leerse bien */
+  @media (max-width: 39.99rem) {
+    .card__desc {
+      font-size: 0.875rem;
+    }
+    .card__list,
+    .card__note {
+      font-size: 0.8125rem;
+    }
+    .card__cta {
+      font-size: 0.875rem;
+      padding-block: 0.65rem;
+    }
+  }
+
+  @media (min-width: 40rem) and (max-width: 59.99rem) {
     /* Tablet: ilustración a la izquierda y contenido a la derecha */
     .card {
       display: grid;
       grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
-      grid-auto-rows: min-content;
-      column-gap: var(--space-6);
-      padding: var(--space-3) var(--space-6) var(--space-6) var(--space-3);
+      column-gap: var(--space-4);
+      align-items: start;
     }
 
     .card > :global(.visual) {
-      grid-row: 1 / span 8;
-      align-self: start;
       position: sticky;
       top: calc(var(--header-height) + var(--space-4));
     }
 
-    .card > :not(:global(.visual)) {
-      grid-column: 2;
-      margin-inline: 0;
-    }
-
-    .card__cta {
-      margin-top: var(--space-8) !important;
-      justify-self: start;
+    .card__body {
+      padding-top: 0.6rem;
     }
   }
 
-  @media (min-width: 72rem) {
+  @media (min-width: 60rem) {
     .services__grid {
       grid-template-columns: repeat(3, 1fr);
+      gap: 1.375rem;
     }
   }
 </style>

@@ -14,7 +14,7 @@ const links = [
 ---
 
 <footer class="site-footer">
-  <div class="container site-footer__grid">
+  <div class="frame"><div class="frame__row site-footer__grid">
     <div class="site-footer__brand">
       <Logo href={link('#inicio')} size={30} />
       <p class="site-footer__tagline">{site.tagline}</p>
@@ -33,15 +33,15 @@ const links = [
         ))}
       </ul>
     </nav>
-  </div>
+  </div></div>
 
-  <div class="container site-footer__bottom">
+  <div class="frame"><div class="frame__row site-footer__bottom">
     <p>© <span data-year>{year}</span> {site.name}</p>
     <ul role="list" class="site-footer__legal">
       <li><a href={withBase('/privacidad')}>Política de privacidad</a></li>
       {site.legalNoticeHref && <li><a href={site.legalNoticeHref}>Aviso legal</a></li>}
     </ul>
-  </div>
+  </div></div>
 </footer>
 
 <script>
@@ -51,10 +51,23 @@ const links = [
 
 <style>
   .site-footer {
-    border-top: 1px solid var(--color-line);
+    position: relative;
     padding-block: var(--space-16) var(--space-8);
-    color: var(--text-muted);
+    color: rgb(244 244 245 / 0.65);
     font-size: var(--text-sm);
+    background:
+      radial-gradient(60% 120% at 50% 0%, rgb(109 40 217 / 0.14), transparent 70%),
+      var(--color-space);
+  }
+
+  /* Línea neón superior */
+  .site-footer::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #8b5cf6 25%, #ddd6fe 50%, #8b5cf6 75%, transparent);
+    box-shadow: 0 0 14px 1px rgb(139 92 246 / 0.6);
   }
 
   .site-footer__grid {
@@ -64,8 +77,9 @@ const links = [
 
   .site-footer__tagline {
     margin-top: var(--space-4);
-    font-family: var(--font-display);
+    font-family: var(--font-brand);
     font-size: var(--text-lg);
+    font-weight: 600;
     color: var(--text);
     letter-spacing: -0.01em;
     max-width: 22ch;
@@ -93,7 +107,7 @@ const links = [
     gap: var(--space-4);
     margin-top: var(--space-16);
     padding-top: var(--space-6);
-    border-top: 1px solid var(--color-line);
+    border-top: 1px solid rgb(139 92 246 / 0.2);
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: 0.04em;

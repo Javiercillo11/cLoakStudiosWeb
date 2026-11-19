@@ -73,27 +73,31 @@ const classes = ['btn', `btn--${variant}`, `btn--${size}`, className];
   }
 
   .btn--primary {
-    background: var(--color-violet-strong);
+    background: linear-gradient(135deg, var(--color-electric) 0%, #7734fd 50%, var(--color-electric-deep) 100%);
     color: #fff;
-    box-shadow: 0 1px 0 rgb(255 255 255 / 0.18) inset;
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.22) inset,
+      var(--glow-neon);
   }
 
   .btn--primary:hover {
-    background: var(--color-violet-deep);
+    background: linear-gradient(135deg, #7c38fd 0%, #6527e8 100%);
     box-shadow:
-      0 1px 0 rgb(255 255 255 / 0.18) inset,
-      var(--glow-violet);
+      0 1px 0 rgb(255 255 255 / 0.22) inset,
+      0 0 34px -2px rgb(139 92 246 / 0.8),
+      0 0 2px rgb(167 139 250 / 0.8);
   }
 
   .btn--secondary {
-    background: rgb(244 244 245 / 0.03);
+    background: rgb(10 9 22 / 0.7);
     color: var(--text);
-    border-color: var(--color-line-strong);
+    border-color: #2a2640;
   }
 
   .btn--secondary:hover {
-    border-color: rgb(196 181 253 / 0.5);
-    background: rgb(139 92 246 / 0.08);
+    border-color: rgb(167 120 250 / 0.7);
+    background: rgb(122 52 252 / 0.1);
+    box-shadow: 0 0 22px -6px rgb(122 52 252 / 0.7);
   }
 
   .btn--link {

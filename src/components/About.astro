@@ -1,127 +1,132 @@
 ---
 import Icon, { type Name } from './Icon.astro';
+import Nebula from './Nebula.astro';
 import { pillars } from '../data/services';
 
 const icons: Name[] = ['compass', 'layers', 'spark', 'message'];
+const glow = ['135deg', '205deg', '160deg', '225deg'];
 ---
 
-<section class="section about" id="estudio" aria-labelledby="about-title">
-  <div class="container about__grid">
-    <div class="about__intro" data-reveal>
-      <p class="eyebrow">Por qué cLoak Studios</p>
-      <h2 id="about-title">Tecnología con propósito.</h2>
-      <p class="lead">
-        Somos un estudio independiente centrado en crear soluciones digitales útiles, claras y bien construidas.
-        Combinamos diseño y desarrollo para que la tecnología trabaje a favor de tu negocio.
-      </p>
-      <blockquote class="about__quote">
-        <p>Build beyond the visible.</p>
-      </blockquote>
-    </div>
+<section class="space-section about" id="estudio" aria-labelledby="about-title" data-cosmos-anchor="about">
+  <Nebula src="left" side="right" top="12%" width="clamp(9rem, 15vw, 18rem)" delay="-13s" />
+  <div class="frame">
+    <div class="frame__row about__grid">
+      <div class="about__intro" data-reveal>
+        <p class="eyebrow">Por qué cLoak Studios</p>
+        <h2 id="about-title">Tecnología con propósito.</h2>
+        <p class="lead">
+          Somos un estudio independiente centrado en crear soluciones digitales útiles, claras y bien construidas.
+          Combinamos diseño y desarrollo para que la tecnología trabaje a favor de tu negocio.
+        </p>
+        <blockquote class="about__quote">
+          <p>Build beyond the visible.</p>
+        </blockquote>
+      </div>
 
-    <ul role="list" class="pillars">
-      {
-        pillars.map((p, i) => (
-          <li class="pillar" data-reveal style={`--reveal-delay:${i * 70}ms`}>
-            <span class="pillar__icon">
-              <Icon name={icons[i]} size={22} />
-            </span>
-            <h3 class="pillar__title">{p.title}</h3>
-            <p class="pillar__text">{p.text}</p>
-          </li>
-        ))
-      }
-    </ul>
+      <ul role="list" class="pillars">
+        {
+          pillars.map((p, i) => (
+            <li class="pillar neon-card" data-reveal style={`--reveal-delay:${i * 70}ms;--glow-angle:${glow[i]}`}>
+              <span class="icon-box">
+                <Icon name={icons[i]} size={18} />
+              </span>
+              <h3 class="pillar__title">{p.title}</h3>
+              <p class="pillar__text">{p.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
   </div>
 </section>
 
 <style>
   .about__grid {
     display: grid;
-    gap: var(--space-12);
+    gap: var(--space-10);
   }
 
   .about__intro {
     display: grid;
-    gap: var(--space-5);
+    gap: var(--space-4);
     align-content: start;
   }
 
   .about__quote {
-    margin: var(--space-6) 0 0;
+    justify-self: start;
+    margin: var(--space-4) 0 0;
+    padding: 0.55rem 1.1rem;
     font-family: var(--font-brand);
     font-size: var(--text-sm);
     font-weight: 600;
     letter-spacing: 0.02em;
     color: var(--color-soft-lavender);
-  }
-
-  .about__quote p::before {
-    content: '— ';
-    color: var(--text-muted);
+    border: 1px solid rgb(139 92 246 / 0.6);
+    border-radius: var(--radius-pill);
+    background: rgb(139 92 246 / 0.08);
+    box-shadow:
+      0 0 18px -6px rgb(139 92 246 / 0.7),
+      inset 0 0 10px -4px rgb(139 92 246 / 0.5);
   }
 
   .pillars {
     display: grid;
-    border-top: 1px solid var(--color-line);
+    gap: 1.125rem;
   }
 
   .pillar {
     display: grid;
-    grid-template-columns: auto 1fr;
-    column-gap: var(--space-5);
-    row-gap: var(--space-1);
-    padding-block: var(--space-6);
-    border-bottom: 1px solid var(--color-line);
+    align-content: start;
+    gap: var(--space-2);
+    padding: 1.4rem 1.35rem 1.5rem;
+    transition: transform var(--duration-base) var(--ease-out), opacity var(--duration-slow) var(--ease-out);
   }
 
-  .pillar__icon {
-    grid-row: span 2;
-    color: var(--color-soft-lavender);
-    padding-top: 0.15rem;
+  .pillar .icon-box {
+    margin-bottom: var(--space-3);
   }
 
   .pillar__title {
-    font-size: var(--text-lg);
-    letter-spacing: -0.015em;
+    font-size: 1.0625rem;
+    line-height: 1.3;
   }
 
   .pillar__text {
-    color: var(--text-muted);
-    font-size: var(--text-sm);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: rgb(244 244 245 / 0.7);
+  }
+
+  .pillar:hover {
+    --edge: rgb(167 139 250 / 0.7);
+  }
+
+  .pillar:hover::after {
+    opacity: 0.95;
+  }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .pillar:hover {
+      transform: translateY(-4px);
+    }
   }
 
   @media (min-width: 40rem) {
     .pillars {
       grid-template-columns: 1fr 1fr;
-      border-top: 0;
-      gap: 0;
-    }
-
-    .pillar {
-      grid-template-columns: 1fr;
-      row-gap: var(--space-3);
-      padding: var(--space-8) var(--space-6) var(--space-8) 0;
-      border-top: 1px solid var(--color-line);
-      border-bottom: 0;
-    }
-
-    .pillar:nth-child(even) {
-      padding-left: var(--space-6);
-      border-left: 1px solid var(--color-line);
-    }
-
-    .pillar__icon {
-      grid-row: auto;
-      margin-bottom: var(--space-3);
     }
   }
 
-  @media (min-width: 72rem) {
+  @media (min-width: 64rem) {
     .about__grid {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-      gap: var(--space-20);
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: var(--space-12);
       align-items: start;
+    }
+
+    .about__intro {
+      position: sticky;
+      top: calc(var(--header-height) + var(--space-10));
     }
   }
 </style>

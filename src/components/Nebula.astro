@@ -1,0 +1,92 @@
+---
+// Nebulosa fotográfica recortada del diseño de referencia (Diseño/2.png),
+// con bordes difuminados y una deriva lenta. Decorativa.
+// Se coloca dentro de una sección con `position: relative; isolation: isolate`.
+import { Image } from 'astro:assets';
+import nebulaLeft from '../assets/cosmos/nebula-left.png';
+import nebulaRight from '../assets/cosmos/nebula-right.png';
+
+interface Props {
+  /** Recorte: franja izquierda o derecha del diseño. */
+  src: 'left' | 'right';
+  /** Borde de la sección al que se pega. */
+  side: 'left' | 'right';
+  top?: string;
+  width?: string;
+  opacity?: number;
+  /** Retraso de la animación (desincroniza las nebulosas). */
+  delay?: string;
+}
+
+const { src, side, top = '0', width = 'clamp(9rem, 14vw, 17rem)', opacity = 1, delay = '0s' } = Astro.props;
+const image = src === 'left' ? nebulaLeft : nebulaRight;
+// Si el recorte se usa en el lado contrario, se refleja para que su borde
+// exterior (el del encuadre original) siga tocando el borde de la pantalla.
+const flip = src !== side;
+---
+
+<div
+  class:list={['nebula', `nebula--${side}`, { 'nebula--flip': flip }]}
+  style={`--top:${top};--w:${width};--o:${opacity};--delay:${delay}`}
+  aria-hidden="true"
+>
+  <Image src={image} alt="" quality={92} format="webp" loading="lazy" decoding="async" />
+</div>
+
+<style>
+  .nebula {
+    position: absolute;
+    z-index: -1;
+    top: var(--top);
+    width: var(--w);
+    opacity: var(--o);
+    pointer-events: none;
+    -webkit-mask-image:
+      linear-gradient(to var(--fade-to), #000 72%, transparent),
+      linear-gradient(to bottom, transparent, #000 14%, #000 84%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(to var(--fade-to), #000 72%, transparent),
+      linear-gradient(to bottom, transparent, #000 14%, #000 84%, transparent);
+    mask-composite: intersect;
+  }
+
+  .nebula--left {
+    --fade-to: right;
+    left: 0;
+  }
+
+  .nebula--right {
+    --fade-to: left;
+    right: 0;
+  }
+
+  .nebula img {
+    display: block;
+    width: 100%;
+    height: auto;
+    transform-origin: var(--fade-to) center;
+    animation: nebula-drift 16s ease-in-out var(--delay) infinite alternate;
+  }
+
+  .nebula--flip img {
+    scale: -1 1;
+  }
+
+  @keyframes nebula-drift {
+    from {
+      transform: translate3d(0, 10px, 0) scale(1) rotate(-1deg);
+      filter: brightness(0.85);
+    }
+    to {
+      transform: translate3d(0, -26px, 0) scale(1.1) rotate(1.2deg);
+      filter: brightness(1.2);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nebula img {
+      animation: none;
+    }
+  }
+</style>

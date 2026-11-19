@@ -1,6 +1,7 @@
 ---
 import ContactForm from './ContactForm.astro';
 import Icon from './Icon.astro';
+import Nebula from './Nebula.astro';
 import { site } from '../data/site';
 
 const next = [
@@ -10,9 +11,11 @@ const next = [
 ];
 ---
 
-<section class="section contact" id="contacto" aria-labelledby="contact-title">
-  <div class="contact__glow" aria-hidden="true"></div>
-  <div class="container contact__grid">
+<section class="space-section contact" id="contacto" aria-labelledby="contact-title" data-cosmos-anchor="contact">
+  <Nebula src="right" side="right" top="4%" width="clamp(11rem, 20vw, 24rem)" delay="-6s" />
+  <Nebula src="left" side="left" top="48%" width="clamp(8rem, 12vw, 15rem)" opacity={0.85} delay="-17s" />
+  <div class="frame">
+  <div class="frame__row contact__grid">
     <div class="contact__intro" data-reveal>
       <p class="eyebrow">Contacto</p>
       <h2 id="contact-title">Hablemos de tu proyecto.</h2>
@@ -27,7 +30,7 @@ const next = [
           {
             next.map((t, i) => (
               <li>
-                <span aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                <span class="neon-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
                 {t}
               </li>
             ))
@@ -45,28 +48,14 @@ const next = [
       }
     </div>
 
-    <div class="contact__panel" data-reveal style="--reveal-delay:120ms">
+    <div class="contact__panel neon-card" data-reveal style="--reveal-delay:120ms;--glow-angle:205deg">
       <ContactForm />
     </div>
+  </div>
   </div>
 </section>
 
 <style>
-  .contact {
-    isolation: isolate;
-    overflow: clip;
-  }
-
-  .contact__glow {
-    position: absolute;
-    z-index: -1;
-    inset: 10% -30% auto auto;
-    width: 60rem;
-    height: 40rem;
-    background: radial-gradient(closest-side, rgb(139 92 246 / 0.14), transparent);
-    pointer-events: none;
-  }
-
   .contact__grid {
     display: grid;
     gap: var(--space-12);
@@ -79,17 +68,17 @@ const next = [
   }
 
   .contact__next {
-    margin-top: var(--space-6);
+    margin-top: var(--space-4);
     padding-top: var(--space-6);
-    border-top: 1px solid var(--color-line);
+    border-top: 1px solid rgb(139 92 246 / 0.25);
   }
 
   .contact__next-title {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-mono);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: rgb(244 244 245 / 0.62);
   }
 
   .contact__next ol {
@@ -100,16 +89,14 @@ const next = [
 
   .contact__next li {
     display: grid;
-    grid-template-columns: 2rem 1fr;
-    color: var(--text-muted);
+    grid-template-columns: 2.5rem 1fr;
+    align-items: baseline;
+    color: rgb(244 244 245 / 0.78);
     font-size: var(--text-sm);
   }
 
   .contact__next li span {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    color: var(--color-violet-text);
-    padding-top: 0.15rem;
+    font-size: 1rem;
   }
 
   .contact__mail {
@@ -123,11 +110,7 @@ const next = [
   }
 
   .contact__panel {
-    padding: clamp(1.25rem, 0.8rem + 2.5vw, 2.5rem);
-    background: var(--surface);
-    border: 1px solid var(--color-line);
-    border-radius: calc(var(--radius-card) + 0.5rem);
-    box-shadow: var(--shadow-card);
+    padding: clamp(1.25rem, 0.8rem + 2.5vw, 2.25rem);
   }
 
   @media (min-width: 64rem) {

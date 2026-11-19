@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "src/components/Hero.astro"
+        ],
+        "createdAt": "2026-11-19T10:52:43.077Z",
+        "reason": "user-provided mockup cLoak Studios/Diseño/1.png shows the lavender gradient on 'Construimos lo que viene.'; user asked for a 100% replica"
+      }
+    ]
+  }
+}

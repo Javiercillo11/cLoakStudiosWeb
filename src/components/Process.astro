@@ -1,27 +1,33 @@
 ---
+import Nebula from './Nebula.astro';
 import { process } from '../data/services';
+
+const glow = ['135deg', '160deg', '200deg', '225deg'];
 ---
 
-<section class="section process" id="proceso" aria-labelledby="process-title">
-  <div class="container">
-    <div class="process__layout">
+<section class="space-section process" id="proceso" aria-labelledby="process-title" data-cosmos-anchor="process">
+  <Nebula src="right" side="left" top="6%" width="clamp(10rem, 17vw, 20rem)" opacity={0.9} delay="-4s" />
+  <div class="frame">
+    <div class="frame__row">
       <header class="process__head" data-reveal>
         <p class="eyebrow">Cómo trabajamos</p>
-        <h2 id="process-title">De la idea a una solución que funciona.</h2>
-        <p class="process__fine">Los plazos y el alcance se concretan en cada propuesta.</p>
+        <h2 id="process-title">De la idea a una solución<br /> que funciona.</h2>
+        <p class="lead">Los plazos y el alcance se concretan en cada propuesta.</p>
       </header>
 
       <ol role="list" class="steps">
         {
           process.map((step, i) => (
-            <li class="step" data-reveal style={`--reveal-delay:${i * 80}ms`}>
-              <span class="step__num" aria-hidden="true">
+            <li
+              class="step neon-card"
+              data-reveal
+              style={`--reveal-delay:${i * 80}ms;--glow-angle:${glow[i]}`}
+            >
+              <span class="step__num neon-num" aria-hidden="true">
                 {String(i + 1).padStart(2, '0')}
               </span>
-              <div>
-                <h3 class="step__title">{step.title}</h3>
-                <p class="step__text">{step.text}</p>
-              </div>
+              <h3 class="step__title">{step.title}</h3>
+              <p class="step__text">{step.text}</p>
             </li>
           ))
         }
@@ -31,101 +37,81 @@ import { process } from '../data/services';
 </section>
 
 <style>
-  .process {
-    background: linear-gradient(180deg, transparent, rgb(24 24 27 / 0.55) 30%, rgb(24 24 27 / 0.55) 70%, transparent);
-  }
-
-  .process__layout {
-    display: grid;
-    gap: var(--space-12);
-  }
-
   .process__head {
     display: grid;
-    gap: var(--space-5);
-    align-content: start;
-  }
-
-  .process__fine {
-    font-size: var(--text-sm);
-    color: var(--text-muted);
+    gap: var(--space-4);
+    max-width: 40rem;
   }
 
   .steps {
-    counter-reset: step;
+    position: relative;
     display: grid;
+    gap: 1.375rem;
+    margin-top: clamp(1.75rem, 1.25rem + 1.5vw, 2.5rem);
   }
 
   .step {
-    position: relative;
     display: grid;
-    grid-template-columns: 3.25rem 1fr;
-    gap: var(--space-4);
-    padding-block: var(--space-6);
-    border-top: 1px solid var(--color-line);
-  }
-
-  .step:last-child {
-    border-bottom: 1px solid var(--color-line);
+    align-content: start;
+    gap: var(--space-2);
+    padding: 1.5rem 1.4rem 1.6rem;
+    transition:
+      transform var(--duration-base) var(--ease-out),
+      opacity var(--duration-slow) var(--ease-out);
   }
 
   .step__num {
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    color: var(--color-violet-text);
-    padding-top: 0.3rem;
+    font-size: 2rem;
+    line-height: 1;
+    margin-bottom: var(--space-4);
   }
 
   .step__title {
-    font-size: var(--text-xl);
+    font-size: 1.125rem;
   }
 
   .step__text {
-    margin-top: var(--space-2);
-    color: var(--text-muted);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: rgb(244 244 245 / 0.7);
   }
 
-  /* Línea de progreso violeta que se ilumina al pasar sobre cada paso */
-  .step::before {
-    content: '';
-    position: absolute;
-    top: -1px;
-    left: 0;
-    width: 3.25rem;
-    height: 1px;
-    background: var(--accent);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform var(--duration-slow) var(--ease-out);
+  .step:hover {
+    --edge: rgb(167 139 250 / 0.7);
   }
 
-  .step:hover::before,
-  .step.is-visible::before {
-    transform: scaleX(1);
+  .step:hover::after {
+    opacity: 0.95;
   }
 
-  @media (min-width: 56rem) {
-    .process__layout {
-      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-      gap: var(--space-16);
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .step:hover {
+      transform: translateY(-4px);
+    }
+  }
+
+  @media (min-width: 40rem) {
+    .steps {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 60rem) {
+    .steps {
+      grid-template-columns: repeat(4, 1fr);
     }
 
-    .process__head {
-      position: sticky;
-      top: calc(var(--header-height) + var(--space-10));
-    }
-
-    .step {
-      grid-template-columns: 5rem 1fr;
-      padding-block: var(--space-8);
-    }
-
-    .step::before {
-      width: 5rem;
-    }
-
-    .step__num {
-      font-size: var(--text-base);
+    /* Hilo de luz que une los pasos */
+    .steps::before {
+      content: '';
+      position: absolute;
+      z-index: -2;
+      left: 4%;
+      right: 4%;
+      top: 3.1rem;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #8b5cf6 12%, #c4b5fd 50%, #8b5cf6 88%, transparent);
+      box-shadow: 0 0 12px 1px rgb(139 92 246 / 0.7);
     }
   }
 </style>

@@ -1,0 +1,569 @@
+---
+// Fondo de universo de cLoak Studios para toda la portada.
+// Nebulosa violeta y polvo estelar generados en canvas, con movimiento lento:
+// deriva de la nebulosa en dos capas, centelleo de estrellas y un leve paralaje
+// con el puntero. Sin movimiento con prefers-reduced-motion.
+// Las secciones hijas marcan su anclaje con data-cosmos-anchor="<nombre>".
+// Las nebulosas fotográficas del diseño se añaden por sección con <Nebula>.
+---
+
+<div class="cosmos" data-cosmos>
+  <div class="cosmos__sky" aria-hidden="true">
+    <canvas class="cosmos__layer cosmos__layer--far" data-cosmos-far></canvas>
+    <canvas class="cosmos__layer cosmos__layer--near" data-cosmos-near></canvas>
+    <canvas class="cosmos__stars" data-cosmos-stars></canvas>
+    <div class="cosmos__fade"></div>
+  </div>
+  <canvas class="cosmos__meteors" data-cosmos-meteors aria-hidden="true"></canvas>
+  <slot />
+</div>
+
+<script>
+  type Pt = [number, number];
+  type Arm = {
+    anchor: string;
+    /** Curva cúbica en px de diseño (lienzo de 1321 px de ancho). */
+    p: [Pt, Pt, Pt, Pt];
+    width: number;
+    glow: number;
+    core: number;
+    dust: number;
+  };
+
+  // Brazos de nebulosa (posiciones medidas sobre el diseño de referencia).
+  const ARMS: Arm[] = [
+    // Hero: gran franja diagonal desde la esquina superior derecha hacia el portátil.
+    { anchor: 'hero', p: [[1420, -40], [1180, 70], [1010, 170], [760, 330]], width: 150, glow: 1, core: 1, dust: 1 },
+    { anchor: 'hero', p: [[1340, 120], [1250, 230], [1180, 300], [1060, 360]], width: 90, glow: 0.55, core: 0.6, dust: 0.6 },
+    { anchor: 'hero', p: [[780, 320], [700, 345], [640, 360], [520, 420]], width: 80, glow: 0.45, core: 0.35, dust: 0.4 },
+    // Resto de secciones: hebras tenues que enlazan las nebulosas del diseño.
+    { anchor: 'process', p: [[1420, 80], [1260, 180], [1180, 320], [1120, 520]], width: 90, glow: 0.45, core: 0.4, dust: 0.5 },
+    { anchor: 'about', p: [[-120, 60], [60, 160], [140, 320], [120, 520]], width: 90, glow: 0.45, core: 0.4, dust: 0.5 },
+    { anchor: 'contact', p: [[1440, 0], [1220, 160], [1060, 320], [880, 560]], width: 120, glow: 0.5, core: 0.45, dust: 0.5 },
+  ];
+
+  // Estrellas brillantes con destello (posiciones del diseño, ancladas).
+  // (Las del hero están en la propia imagen del diseño y se animan allí.)
+  const FLARES: { anchor: string; x: number; y: number; r: number }[] = [
+    { anchor: 'services', x: 1140, y: 160, r: 1.3 },
+    { anchor: 'services', x: 330, y: 40, r: 0.8 },
+    { anchor: 'services', x: 95, y: 330, r: 1 },
+    { anchor: 'services', x: 1240, y: 600, r: 0.9 },
+    { anchor: 'process', x: 1180, y: 120, r: 1.1 },
+    { anchor: 'process', x: 140, y: 420, r: 0.9 },
+    { anchor: 'about', x: 260, y: 90, r: 1 },
+    { anchor: 'about', x: 1220, y: 380, r: 1.2 },
+    { anchor: 'contact', x: 120, y: 200, r: 1.1 },
+    { anchor: 'contact', x: 1250, y: 520, r: 0.9 },
+  ];
+
+  const root = document.querySelector<HTMLElement>('[data-cosmos]');
+  if (root) init(root);
+
+  function init(root: HTMLElement) {
+    const far = root.querySelector<HTMLCanvasElement>('[data-cosmos-far]')!;
+    const near = root.querySelector<HTMLCanvasElement>('[data-cosmos-near]')!;
+    const starsCanvas = root.querySelector<HTMLCanvasElement>('[data-cosmos-stars]')!;
+    const meteorCanvas = root.querySelector<HTMLCanvasElement>('[data-cosmos-meteors]')!;
+    const mctx = meteorCanvas.getContext('2d')!;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    let W = 0;
+    let H = 0;
+    let dpr = 1;
+    let twinkles: { x: number; y: number; r: number; a: number; s: number; ph: number; flare: boolean; hue: number }[] = [];
+    let running = false;
+    let visible = true;
+    let raf = 0;
+
+    // PRNG determinista: el cielo es siempre el mismo.
+    const rng = (seed: number) => () => {
+      seed = (seed * 16807) % 2147483647;
+      return (seed - 1) / 2147483646;
+    };
+    const gauss = (r: () => number) => (r() + r() + r() - 1.5) / 1.5;
+
+    const anchors = () => {
+      const top = root.getBoundingClientRect().top;
+      const out: Record<string, number> = {};
+      root.querySelectorAll<HTMLElement>('[data-cosmos-anchor]').forEach((el) => {
+        out[el.dataset.cosmosAnchor!] = el.getBoundingClientRect().top - top;
+      });
+      return out;
+    };
+
+    const bez = (p: Arm['p'], t: number): Pt => {
+      const u = 1 - t;
+      return [
+        u * u * u * p[0][0] + 3 * u * u * t * p[1][0] + 3 * u * t * t * p[2][0] + t * t * t * p[3][0],
+        u * u * u * p[0][1] + 3 * u * u * t * p[1][1] + 3 * u * t * t * p[2][1] + t * t * t * p[3][1],
+      ];
+    };
+
+    function blob(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, rgb: string, a: number) {
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, `rgba(${rgb},${a})`);
+      g.addColorStop(0.45, `rgba(${rgb},${a * 0.45})`);
+      g.addColorStop(1, `rgba(${rgb},0)`);
+      ctx.fillStyle = g;
+      ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+
+    // Suaviza el tramado de los degradados acumulados (evita un patrón de rejilla).
+    function soften(c: HTMLCanvasElement, px: number) {
+      const ctx = c.getContext('2d')!;
+      if (!('filter' in ctx)) return;
+      const tmp = document.createElement('canvas');
+      tmp.width = c.width;
+      tmp.height = c.height;
+      tmp.getContext('2d')!.drawImage(c, 0, 0);
+      ctx.save();
+      ctx.globalCompositeOperation = 'copy';
+      ctx.filter = `blur(${px}px)`;
+      ctx.drawImage(tmp, 0, 0);
+      ctx.restore();
+    }
+
+    function paintNebula() {
+      // Resolución reducida: la nebulosa es difusa y así cuesta poco.
+      const q = 0.5;
+      const sx = W / 1321;
+      const sy = Math.max(sx, 0.62);
+      const a = anchors();
+      const map = (arm: { anchor: string }, x: number, y: number): Pt => [x * sx * q, ((a[arm.anchor] ?? -9999) + y * sy) * q];
+
+      for (const c of [far, near]) {
+        c.width = Math.ceil(W * q);
+        c.height = Math.ceil(H * q);
+      }
+      const fctx = far.getContext('2d')!;
+      const nctx = near.getContext('2d')!;
+      const r = rng(1337);
+
+      // Capa lejana: resplandores amplios y halo violeta tras el portátil.
+      fctx.globalCompositeOperation = 'lighter';
+      const heroGlow = map({ anchor: 'hero' }, 860, 330);
+      blob(fctx, heroGlow[0], heroGlow[1], 420 * sx * q, '109,40,217', 0.1);
+      blob(fctx, heroGlow[0] + 60 * sx * q, heroGlow[1] - 40 * sx * q, 260 * sx * q, '139,92,246', 0.06);
+
+      for (const arm of ARMS) {
+        const steps = 70;
+        for (let i = 0; i <= steps; i++) {
+          const [x, y] = bez(arm.p, i / steps);
+          const [px, py] = map(arm, x + gauss(r) * arm.width * 0.5, y + gauss(r) * arm.width * 0.5);
+          const rad = arm.width * (1.1 + r() * 0.9) * sx * q;
+          blob(fctx, px, py, rad, r() > 0.5 ? '76,29,149' : '109,40,217', 0.028 * arm.glow);
+        }
+      }
+
+      soften(far, 2);
+
+      // Capa cercana: filamentos brillantes, carriles de polvo y cúmulos de estrellas.
+      nctx.globalCompositeOperation = 'lighter';
+      for (const arm of ARMS) {
+        const steps = 220;
+        for (let i = 0; i <= steps; i++) {
+          const t = i / steps;
+          const [x, y] = bez(arm.p, t);
+          const taper = Math.sin(Math.PI * Math.min(1, Math.max(0, t * 1.05)));
+          const off = gauss(r) * arm.width * 0.32;
+          const [px, py] = map(arm, x + off, y + gauss(r) * arm.width * 0.18);
+          const rad = (4 + r() * 18) * sx * q * (0.5 + taper);
+          const tone = r();
+          const rgb = tone > 0.82 ? '221,214,254' : tone > 0.45 ? '167,139,250' : '139,92,246';
+          blob(nctx, px, py, rad, rgb, (0.02 + r() * 0.05) * arm.core * (0.35 + taper));
+        }
+      }
+
+      // Filamentos: hebras finas y brillantes que siguen cada brazo.
+      nctx.save();
+      nctx.lineCap = 'round';
+      if ('filter' in nctx) nctx.filter = `blur(${Math.max(1, 1.6 * sx * q)}px)`;
+      for (const arm of ARMS) {
+        const strands = Math.round(9 * arm.core);
+        for (let k = 0; k < strands; k++) {
+          const off = () => [gauss(r) * arm.width * 0.3, gauss(r) * arm.width * 0.22] as const;
+          const p = arm.p.map(([x, y]) => {
+            const [ox, oy] = off();
+            return map(arm, x + ox, y + oy);
+          });
+          nctx.beginPath();
+          nctx.moveTo(p[0][0], p[0][1]);
+          nctx.bezierCurveTo(p[1][0], p[1][1], p[2][0], p[2][1], p[3][0], p[3][1]);
+          const tone = r();
+          nctx.strokeStyle = tone > 0.6 ? `rgba(221,214,254,${0.05 + r() * 0.07})` : `rgba(167,139,250,${0.06 + r() * 0.08})`;
+          nctx.lineWidth = (1 + r() * 4) * sx * q;
+          nctx.stroke();
+        }
+      }
+      nctx.restore();
+
+      // Polvo oscuro que recorta la nebulosa (le da textura de galaxia real).
+      nctx.globalCompositeOperation = 'source-over';
+      for (const arm of ARMS) {
+        const steps = 120;
+        for (let i = 0; i <= steps; i++) {
+          const [x, y] = bez(arm.p, i / steps);
+          const [px, py] = map(arm, x + gauss(r) * arm.width * 0.35, y + gauss(r) * arm.width * 0.25 + arm.width * 0.12);
+          const rad = (8 + r() * 30) * sx * q;
+          blob(nctx, px, py, rad, '6,5,11', 0.34 * arm.dust);
+        }
+      }
+
+      soften(near, 0.8);
+
+      // Cúmulos de estrellas a lo largo de los brazos.
+      nctx.globalCompositeOperation = 'lighter';
+      for (const arm of ARMS) {
+        const n = Math.round(260 * arm.core);
+        for (let i = 0; i < n; i++) {
+          const [x, y] = bez(arm.p, r());
+          const [px, py] = map(arm, x + gauss(r) * arm.width * 0.7, y + gauss(r) * arm.width * 0.7);
+          const al = 0.25 + r() * 0.6;
+          nctx.fillStyle = r() > 0.7 ? `rgba(221,214,254,${al})` : `rgba(255,255,255,${al})`;
+          const s = (r() > 0.93 ? 1.2 : 0.55) * q * Math.max(1, dpr * 0.8);
+          nctx.fillRect(px, py, s, s);
+        }
+      }
+
+      // Campo de estrellas de fondo (estático, muy fino).
+      const field = Math.round((W * H) / 1700);
+      for (let i = 0; i < field; i++) {
+        const al = Math.pow(r(), 2.2) * 0.75 + 0.06;
+        nctx.fillStyle = r() > 0.85 ? `rgba(196,181,253,${al})` : `rgba(244,244,245,${al})`;
+        const s = (r() > 0.97 ? 1.1 : 0.6) * q;
+        nctx.fillRect(r() * W * q, r() * H * q, s, s);
+      }
+
+      // Estrellas que centellean (dibujadas en cada fotograma).
+      twinkles = [];
+      const count = Math.round((W * H) / 9000);
+      for (let i = 0; i < count; i++) {
+        twinkles.push({
+          x: r() * W,
+          y: r() * H,
+          r: 0.4 + Math.pow(r(), 3) * 1.1,
+          a: 0.35 + r() * 0.55,
+          s: 0.6 + r() * 1.8,
+          ph: r() * Math.PI * 2,
+          flare: false,
+          hue: r(),
+        });
+      }
+      for (const f of FLARES) {
+        if (a[f.anchor] === undefined) continue;
+        twinkles.push({
+          x: f.x * sx,
+          y: a[f.anchor] + f.y * sy,
+          r: f.r * Math.max(0.75, Math.min(1, sx * 1.2)),
+          a: 1,
+          s: 0.35 + r() * 0.4,
+          ph: r() * Math.PI * 2,
+          flare: true,
+          hue: 0,
+        });
+      }
+    }
+
+    // Solo se redibuja la franja visible (el lienzo ocupa toda la portada).
+    function drawStars(t: number, all = false) {
+      const ctx = starsCanvas.getContext('2d')!;
+      const top = root.getBoundingClientRect().top;
+      const y0 = all ? 0 : Math.max(0, -top - 80);
+      const y1 = all ? H : Math.min(H, -top + window.innerHeight + 80);
+      if (y1 <= y0) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, y0, W, y1 - y0);
+      ctx.clip();
+      ctx.clearRect(0, y0, W, y1 - y0);
+      ctx.globalCompositeOperation = 'lighter';
+      for (const s of twinkles) {
+        if (s.y < y0 - 40 || s.y > y1 + 40) continue;
+        const k = 0.62 + 0.38 * Math.sin(t * 0.001 * s.s + s.ph);
+        const al = s.a * k;
+        if (s.flare) {
+          const R = s.r * 14;
+          const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, R);
+          g.addColorStop(0, `rgba(255,255,255,${0.95 * k})`);
+          g.addColorStop(0.08, `rgba(221,214,254,${0.55 * k})`);
+          g.addColorStop(0.35, `rgba(139,92,246,${0.16 * k})`);
+          g.addColorStop(1, 'rgba(139,92,246,0)');
+          ctx.fillStyle = g;
+          ctx.fillRect(s.x - R, s.y - R, R * 2, R * 2);
+          // Destello de cuatro puntas.
+          const L = s.r * (16 + 8 * k);
+          for (const [dx, dy] of [
+            [1, 0],
+            [0, 1],
+          ]) {
+            const lg = ctx.createLinearGradient(s.x - dx * L, s.y - dy * L, s.x + dx * L, s.y + dy * L);
+            lg.addColorStop(0, 'rgba(221,214,254,0)');
+            lg.addColorStop(0.5, `rgba(255,255,255,${0.85 * k})`);
+            lg.addColorStop(1, 'rgba(221,214,254,0)');
+            ctx.fillStyle = lg;
+            if (dx) ctx.fillRect(s.x - L, s.y - 0.5, L * 2, 1);
+            else ctx.fillRect(s.x - 0.5, s.y - L, 1, L * 2);
+          }
+        } else {
+          ctx.fillStyle = s.hue > 0.75 ? `rgba(196,181,253,${al})` : `rgba(255,255,255,${al})`;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
+
+    function resize() {
+      const rect = root.getBoundingClientRect();
+      const nw = Math.round(rect.width);
+      const nh = Math.round(rect.height);
+      if (nw === W && Math.abs(nh - H) < 2) return;
+      W = nw;
+      H = nh;
+      // Limita la memoria del lienzo de estrellas en páginas muy largas.
+      dpr = Math.min(window.devicePixelRatio || 1, 1.75, Math.sqrt(9e6 / Math.max(1, W * H)));
+      starsCanvas.width = Math.round(W * dpr);
+      starsCanvas.height = Math.round(H * dpr);
+      paintNebula();
+      drawStars(performance.now(), true);
+      sizeMeteors();
+    }
+
+    // Bucle a ~30 fps, solo mientras el cielo es visible y la pestaña activa.
+    let last = 0;
+    // Estrellas fugaces ocasionales (lienzo fijo del tamaño de la ventana).
+    type Meteor = { x: number; y: number; vx: number; vy: number; len: number; born: number; life: number };
+    let meteors: Meteor[] = [];
+    let nextMeteor = performance.now() + 2500;
+    let mW = 0;
+    let mH = 0;
+    const sizeMeteors = () => {
+      mW = window.innerWidth;
+      mH = window.innerHeight;
+      meteorCanvas.width = Math.round(mW * dpr);
+      meteorCanvas.height = Math.round(mH * dpr);
+    };
+    const drawMeteors = (t: number) => {
+      if (t > nextMeteor) {
+        const ang = ((191 + Math.random() * 10) * Math.PI) / 180; // hacia abajo-izquierda, trayectoria tendida
+        const speed = 0.75 + Math.random() * 0.5; // px/ms
+        meteors.push({
+          x: mW * (0.5 + Math.random() * 0.5),
+          y: mH * (0.02 + Math.random() * 0.16), // franja alta del cielo
+          vx: Math.cos(ang) * speed,
+          vy: -Math.sin(ang) * speed,
+          len: 110 + Math.random() * 130,
+          born: t,
+          life: 550 + Math.random() * 350,
+        });
+        nextMeteor = t + 4200 + Math.random() * 5200;
+      }
+      mctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      mctx.clearRect(0, 0, mW, mH);
+      meteors = meteors.filter((m) => t - m.born < m.life);
+      for (const m of meteors) {
+        const age = t - m.born;
+        const k = age / m.life;
+        const fade = Math.sin(Math.PI * k);
+        const hx = m.x + m.vx * age;
+        const hy = m.y + m.vy * age;
+        const n = Math.hypot(m.vx, m.vy);
+        const tx = hx - (m.vx / n) * m.len;
+        const ty = hy - (m.vy / n) * m.len;
+        const g = mctx.createLinearGradient(hx, hy, tx, ty);
+        g.addColorStop(0, `rgba(255,255,255,${0.95 * fade})`);
+        g.addColorStop(0.15, `rgba(221,214,254,${0.6 * fade})`);
+        g.addColorStop(1, 'rgba(139,92,246,0)');
+        mctx.strokeStyle = g;
+        mctx.lineWidth = 1.4;
+        mctx.lineCap = 'round';
+        mctx.beginPath();
+        mctx.moveTo(hx, hy);
+        mctx.lineTo(tx, ty);
+        mctx.stroke();
+        const halo = mctx.createRadialGradient(hx, hy, 0, hx, hy, 9);
+        halo.addColorStop(0, `rgba(255,255,255,${0.9 * fade})`);
+        halo.addColorStop(0.4, `rgba(196,181,253,${0.35 * fade})`);
+        halo.addColorStop(1, 'rgba(139,92,246,0)');
+        mctx.fillStyle = halo;
+        mctx.fillRect(hx - 9, hy - 9, 18, 18);
+      }
+    };
+
+    const loop = (t: number) => {
+      raf = requestAnimationFrame(loop);
+      drawMeteors(t);
+      if (t - last < 33) return;
+      last = t;
+      drawStars(t);
+      // Paralaje suave con el puntero.
+      px += (tx - px) * 0.06;
+      py += (ty - py) * 0.06;
+      root.style.setProperty('--cx', px.toFixed(3));
+      root.style.setProperty('--cy', py.toFixed(3));
+    };
+    const start = () => {
+      if (running || reduce.matches || !visible || document.hidden) return;
+      running = true;
+      raf = requestAnimationFrame(loop);
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+      meteors = [];
+      mctx.clearRect(0, 0, meteorCanvas.width, meteorCanvas.height);
+    };
+    window.addEventListener('resize', () => sizeMeteors(), { passive: true });
+
+    let px = 0;
+    let py = 0;
+    let tx = 0;
+    let ty = 0;
+    if (window.matchMedia('(pointer: fine)').matches) {
+      window.addEventListener(
+        'pointermove',
+        (e) => {
+          tx = (e.clientX / window.innerWidth) * 2 - 1;
+          ty = (e.clientY / window.innerHeight) * 2 - 1;
+        },
+        { passive: true },
+      );
+    }
+
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      root.classList.toggle('is-paused', !visible);
+      visible ? start() : stop();
+    }).observe(root);
+    document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+    reduce.addEventListener('change', () => (reduce.matches ? stop() : start()));
+
+    let timer = 0;
+    new ResizeObserver(() => {
+      clearTimeout(timer);
+      timer = window.setTimeout(resize, 120);
+    }).observe(root);
+    resize();
+    root.classList.add('is-ready');
+    start();
+  }
+</script>
+
+<style>
+  .cosmos {
+    --cx: 0;
+    --cy: 0;
+    position: relative;
+    isolation: isolate;
+    overflow-x: clip;
+    margin-top: calc(var(--header-height) * -1);
+    background:
+      radial-gradient(90% 60% at 70% 30%, rgb(76 29 149 / 0.16), transparent 70%),
+      radial-gradient(60% 40% at 10% 75%, rgb(76 29 149 / 0.1), transparent 70%),
+      var(--color-space);
+  }
+
+  .cosmos__sky {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .cosmos__layer,
+  .cosmos__stars {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1.6s var(--ease-out);
+  }
+
+  .cosmos.is-ready .cosmos__layer,
+  .cosmos.is-ready .cosmos__stars {
+    opacity: 1;
+  }
+
+  /* Deriva lenta de la nebulosa: dos capas a distinta velocidad (profundidad). */
+  .cosmos__layer {
+    inset: -80px;
+    width: calc(100% + 160px);
+    height: calc(100% + 160px);
+  }
+
+  .cosmos__layer--far {
+    translate: calc(var(--cx) * -6px) calc(var(--cy) * -5px);
+    animation: cosmos-drift-far 26s ease-in-out infinite alternate;
+  }
+
+  .cosmos__layer--near {
+    translate: calc(var(--cx) * -13px) calc(var(--cy) * -10px);
+    animation: cosmos-drift-near 18s ease-in-out infinite alternate;
+  }
+
+  .cosmos__stars {
+    translate: calc(var(--cx) * -20px) calc(var(--cy) * -15px);
+  }
+
+  .cosmos.is-paused .cosmos__layer {
+    animation-play-state: paused;
+  }
+
+  @keyframes cosmos-drift-far {
+    from {
+      transform: translate3d(42px, -30px, 0) rotate(-0.25deg);
+      opacity: 0.7;
+    }
+    to {
+      transform: translate3d(-46px, 34px, 0) rotate(0.25deg);
+      opacity: 1;
+    }
+  }
+
+  @keyframes cosmos-drift-near {
+    from {
+      transform: translate3d(-34px, 26px, 0);
+      opacity: 0.8;
+    }
+    to {
+      transform: translate3d(40px, -30px, 0);
+      opacity: 1;
+    }
+  }
+
+  /* Estrellas fugaces: por encima del fondo, sin interceptar el puntero */
+  .cosmos__meteors {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+  }
+
+  /* Transición al negro de las secciones siguientes */
+  .cosmos__fade {
+    position: absolute;
+    inset: auto 0 0;
+    height: 10rem;
+    background: linear-gradient(to bottom, transparent, var(--bg));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cosmos__layer {
+      animation: none;
+    }
+    .cosmos__meteors {
+      display: none;
+    }
+    .cosmos__layer,
+    .cosmos__stars {
+      translate: none;
+    }
+  }
+</style>

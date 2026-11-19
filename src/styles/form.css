@@ -105,9 +105,9 @@
   width: 100%;
   min-height: 3rem;
   padding: 0.75rem 0.95rem;
-  background: var(--color-obsidian);
+  background: rgb(8 6 15 / 0.72);
   color: var(--text);
-  border: 1px solid var(--color-control-border);
+  border: 1px solid var(--color-control-violet);
   border-radius: var(--radius-control);
   font-size: var(--text-base); /* ≥16px: evita zoom automático en iOS */
   line-height: 1.4;
@@ -122,13 +122,15 @@
 }
 
 .control:hover {
-  border-color: #a1a1aa;
+  border-color: var(--color-violet-text);
 }
 
 .control:focus-visible {
   outline: none;
   border-color: var(--color-soft-lavender);
-  box-shadow: 0 0 0 3px rgb(139 92 246 / 0.35);
+  box-shadow:
+    0 0 0 3px rgb(139 92 246 / 0.3),
+    0 0 22px -4px rgb(139 92 246 / 0.7);
 }
 
 .control--area {
@@ -186,8 +188,8 @@
   gap: var(--space-3);
   align-items: flex-start;
   padding: var(--space-4);
-  background: var(--color-obsidian);
-  border: 1px solid var(--color-line-strong);
+  background: rgb(8 6 15 / 0.6);
+  border: 1px solid rgb(167 139 250 / 0.22);
   border-radius: var(--radius-control);
   cursor: pointer;
   transition:
@@ -196,7 +198,7 @@
 }
 
 .service-option:hover {
-  border-color: var(--color-control-border);
+  border-color: rgb(167 139 250 / 0.55);
 }
 
 .service-option__input {
@@ -213,7 +215,7 @@
   height: 1.125rem;
   margin-top: 0.15rem;
   border-radius: 50%;
-  border: 1.5px solid var(--color-control-border);
+  border: 1.5px solid var(--color-control-violet);
   transition:
     border-color var(--duration-fast) ease,
     box-shadow var(--duration-fast) ease;
@@ -237,12 +239,15 @@
 
 .service-option:has(:checked) {
   border-color: var(--color-electric-violet);
-  background: rgb(139 92 246 / 0.09);
+  background: rgb(139 92 246 / 0.14);
+  box-shadow:
+    0 0 22px -6px rgb(139 92 246 / 0.8),
+    inset 0 0 14px -6px rgb(139 92 246 / 0.6);
 }
 
 .service-option:has(:checked) .service-option__dot {
   border-color: var(--color-soft-lavender);
-  box-shadow: inset 0 0 0 4px var(--color-obsidian);
+  box-shadow: inset 0 0 0 4px #0d0a16;
   background: var(--color-soft-lavender);
 }
 
@@ -260,8 +265,9 @@
   display: grid;
   gap: var(--space-6);
   padding: var(--space-6) !important;
-  background: rgb(139 92 246 / 0.05);
-  border: 1px solid rgb(139 92 246 / 0.22) !important;
+  background: rgb(139 92 246 / 0.06);
+  border: 1px solid rgb(139 92 246 / 0.3) !important;
+  box-shadow: inset 0 0 30px -18px rgb(139 92 246 / 0.7);
   border-radius: var(--radius-card);
 }
 
@@ -324,8 +330,8 @@
   min-height: 2.5rem;
   padding: 0.45rem 0.9rem 0.45rem 0.7rem;
   font-size: var(--text-sm);
-  background: var(--color-obsidian);
-  border: 1px solid var(--color-line-strong);
+  background: rgb(8 6 15 / 0.6);
+  border: 1px solid rgb(167 139 250 / 0.22);
   border-radius: var(--radius-pill);
   cursor: pointer;
   user-select: none;
@@ -335,7 +341,7 @@
 }
 
 .chip:hover {
-  border-color: var(--color-control-border);
+  border-color: rgb(167 139 250 / 0.55);
 }
 
 .chip__input {
@@ -349,7 +355,7 @@
 .chip__box {
   width: 0.875rem;
   height: 0.875rem;
-  border: 1.5px solid var(--color-control-border);
+  border: 1.5px solid var(--color-control-violet);
   border-radius: 4px;
   transition: all var(--duration-fast) ease;
 }
@@ -360,13 +366,14 @@
 
 .chip:has(:checked) {
   border-color: var(--color-electric-violet);
-  background: rgb(139 92 246 / 0.12);
+  background: rgb(139 92 246 / 0.16);
+  box-shadow: 0 0 16px -6px rgb(139 92 246 / 0.8);
 }
 
 .chip:has(:checked) .chip__box {
   border-color: var(--color-soft-lavender);
   background: var(--color-soft-lavender);
-  box-shadow: inset 0 0 0 2.5px var(--color-obsidian);
+  box-shadow: inset 0 0 0 2.5px #0d0a16;
 }
 
 .chip:has(:focus-visible) {
@@ -413,7 +420,7 @@
   place-items: center;
   width: 1.375rem;
   height: 1.375rem;
-  border: 1.5px solid var(--color-control-border);
+  border: 1.5px solid var(--color-control-violet);
   border-radius: 6px;
   color: transparent;
   transition: all var(--duration-fast) ease;
@@ -529,21 +536,24 @@
   padding: 0.9rem 1.6rem;
   border: 0;
   border-radius: var(--radius-pill);
-  background: var(--color-violet-strong);
+  background: linear-gradient(135deg, var(--color-electric) 0%, #7734fd 50%, var(--color-electric-deep) 100%);
   color: #fff;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 1px 0 rgb(255 255 255 / 0.18) inset;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.22) inset,
+    var(--glow-neon);
   transition:
     background-color var(--duration-fast) ease,
     box-shadow var(--duration-base) ease;
 }
 
 .submit:hover:not(:disabled) {
-  background: var(--color-violet-deep);
+  background: linear-gradient(135deg, var(--color-violet-strong), var(--color-violet-deep));
   box-shadow:
-    0 1px 0 rgb(255 255 255 / 0.18) inset,
-    var(--glow-violet);
+    0 1px 0 rgb(255 255 255 / 0.22) inset,
+    0 0 34px -2px rgb(139 92 246 / 0.8),
+    0 0 2px rgb(167 139 250 / 0.8);
 }
 
 .submit:disabled {
