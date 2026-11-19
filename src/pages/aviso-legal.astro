@@ -1,0 +1,95 @@
+---
+import LegalPage from '../components/LegalPage.astro';
+import LegalValue from '../components/LegalValue.astro';
+import { legal, site } from '../data/site';
+import { withBase } from '../lib/paths';
+
+// Información exigida por el art. 10 de la LSSI-CE (Ley 34/2002).
+// Texto orientativo: conviene que lo revise un asesor antes de darlo por definitivo.
+const isCompany = legal.holderType === 'sociedad';
+---
+
+<LegalPage
+  title="Aviso legal"
+  description="Datos identificativos del titular de cloakstudios.app y condiciones de uso de la web."
+  path="/aviso-legal"
+>
+  <h2>1. Datos identificativos</h2>
+  <p>
+    En cumplimiento del artículo 10 de la Ley 34/2002, de Servicios de la Sociedad de la Información y de Comercio
+    Electrónico (LSSI-CE), se informa de los datos del titular de este sitio web:
+  </p>
+  <ul>
+    <li>Titular: <LegalValue value={legal.holder} missing={isCompany ? 'razón social' : 'nombre completo'} /></li>
+    <li>{isCompany ? 'CIF' : 'NIF'}: <LegalValue value={legal.taxId} missing={isCompany ? 'CIF' : 'NIF'} /></li>
+    <li>Domicilio: <LegalValue value={legal.address} missing="domicilio" /></li>
+    {
+      isCompany && (
+        <li>
+          Datos registrales: <LegalValue value={legal.registry} missing="inscripción en el Registro Mercantil" />
+        </li>
+      )
+    }
+    <li>
+      Email:{' '}
+      {site.email ? <a href={`mailto:${site.email}`}>{site.email}</a> : <LegalValue value={null} missing="email" />}
+    </li>
+    {legal.phone && <li>Teléfono: {legal.phone}</li>}
+    <li>Sitio web: cloakstudios.app (en adelante, «la web»)</li>
+  </ul>
+  <p>
+    cLoak Studios es el nombre comercial con el que el titular presta sus servicios.
+    {legal.holderType === null && <mark>pendiente — indicar si el titular es autónomo o sociedad</mark>}
+  </p>
+
+  <h2>2. Objeto</h2>
+  <p>
+    La web presenta los servicios de cLoak Studios (desarrollo de páginas web, aplicaciones de gestión y soluciones QR
+    para reseñas) y permite a los interesados solicitar información o presupuesto. La información de la web es de
+    carácter general y no constituye una oferta vinculante: las condiciones de cada encargo se acuerdan por escrito con
+    cada cliente.
+  </p>
+
+  <h2>3. Condiciones de uso</h2>
+  <p>
+    El acceso a la web es gratuito y no requiere registro. Al usarla, te comprometes a hacerlo de forma lícita, sin dañar
+    la web ni a terceros, y a no enviar a través del formulario contenido falso, ofensivo, publicitario no solicitado o
+    que infrinja derechos de otras personas.
+  </p>
+
+  <h2>4. Propiedad intelectual e industrial</h2>
+  <p>
+    Los textos, el diseño, el logotipo, la marca cLoak Studios, las imágenes y el código de la web pertenecen al titular
+    o se usan con autorización. No está permitida su reproducción, distribución, comunicación pública o transformación
+    sin autorización previa, salvo para uso personal y privado. Los trabajos de clientes que se muestren en la web se
+    publican con su consentimiento y sus marcas pertenecen a sus respectivos titulares.
+  </p>
+
+  <h2>5. Responsabilidad</h2>
+  <p>
+    El titular procura que la información de la web sea correcta y esté actualizada, pero no garantiza la ausencia de
+    errores ni la disponibilidad continua de la web, y no se hace responsable de los daños derivados de interrupciones,
+    fallos técnicos o virus ajenos a su control.
+  </p>
+
+  <h2>6. Enlaces externos</h2>
+  <p>
+    La web incluye enlaces a sitios de terceros (por ejemplo, WhatsApp, GitHub, LinkedIn o el portafolio personal del
+    fundador). El titular no controla esos sitios ni responde de sus contenidos o de sus políticas de privacidad.
+  </p>
+
+  <h2>7. Protección de datos</h2>
+  <p>
+    El tratamiento de los datos personales que nos facilitas se explica en la
+    <a href={withBase('/privacidad')}>política de privacidad</a>. La web no usa cookies.
+  </p>
+
+  <h2>8. Legislación aplicable y jurisdicción</h2>
+  <p>
+    Este aviso legal se rige por la legislación española. Para cualquier controversia, las partes se someten a los
+    juzgados y tribunales que correspondan conforme a la ley; si quien usa la web es consumidor, serán los de su
+    domicilio.
+  </p>
+
+  <p class="updated">Última actualización: <LegalValue value={legal.updatedAt} missing="fecha" /></p>
+</LegalPage>

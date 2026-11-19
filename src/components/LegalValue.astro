@@ -1,0 +1,12 @@
+---
+// Muestra un dato legal o, si aún falta, una marca «pendiente — …».
+interface Props {
+  value: string | null | undefined;
+  /** Qué falta, p. ej. «NIF». */
+  missing: string;
+}
+
+const { value, missing } = Astro.props;
+---
+
+{value ? <Fragment>{value}</Fragment> : <mark>pendiente — {missing}</mark>}

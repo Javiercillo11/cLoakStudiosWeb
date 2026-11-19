@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { legalComplete } from './src/data/site.ts';
 
 // En CI, actions/configure-pages proporciona el origen y el prefijo reales:
 //   - github.io sin dominio:  SITE_URL=https://<usuario>.github.io  BASE_PATH=/<repo>
@@ -17,8 +18,8 @@ export default defineConfig({
   build: { inlineStylesheets: 'auto' },
   integrations: [
     sitemap({
-      // La política de privacidad es un borrador (noindex) hasta que se complete.
-      filter: (page) => !page.includes('/privacidad'),
+      // Las páginas legales son un borrador (noindex) hasta que estén todos los datos del titular.
+      filter: (page) => legalComplete || !/\/(privacidad|aviso-legal)\/?$/.test(page),
     }),
   ],
 });

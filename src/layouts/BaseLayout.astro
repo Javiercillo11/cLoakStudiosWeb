@@ -9,6 +9,7 @@ import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal
 import groteskLatin from '@fontsource-variable/space-grotesk/files/space-grotesk-latin-wght-normal.woff2?url';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import WhatsAppButton from '../components/WhatsAppButton.astro';
 import { site } from '../data/site';
 
 interface Props {
@@ -77,6 +78,7 @@ const ogImage = absoluteUrl('/og-image.png');
       <slot />
     </main>
     <Footer />
+    <WhatsAppButton />
 
     <script>
       // Entrada discreta de secciones al hacer scroll (sin efecto si reduce motion).

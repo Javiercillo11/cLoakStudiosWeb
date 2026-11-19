@@ -3,6 +3,9 @@ import ContactForm from './ContactForm.astro';
 import Icon from './Icon.astro';
 import Nebula from './Nebula.astro';
 import { site } from '../data/site';
+import { whatsappUrl } from '../lib/whatsapp';
+
+const whatsapp = whatsappUrl(site.whatsapp.phone, site.whatsapp.message);
 
 const next = [
   'Revisamos tu solicitud y el servicio que has elegido.',
@@ -39,11 +42,23 @@ const next = [
       </div>
 
       {
-        site.email && (
-          <a class="contact__mail" href={`mailto:${site.email}`}>
-            <Icon name="mail" size={20} />
-            {site.email}
-          </a>
+        (site.email || whatsapp) && (
+          <div class="contact__direct">
+            {site.email && (
+              <a class="contact__mail" href={`mailto:${site.email}`}>
+                <Icon name="mail" size={20} />
+                {site.email}
+              </a>
+            )}
+            {whatsapp && (
+              <p class="contact__wa">
+                ¿Prefieres WhatsApp?{' '}
+                <a href={whatsapp} target="_blank" rel="noopener">
+                  Escríbenos<span class="visually-hidden"> (se abre en una pestaña nueva)</span>
+                </a>
+              </p>
+            )}
+          </div>
         )
       }
     </div>
@@ -106,6 +121,26 @@ const next = [
     margin-top: var(--space-4);
     color: var(--text);
     text-decoration: none;
+    font-weight: 500;
+  }
+
+  .contact__direct {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+
+  .contact__direct .contact__mail {
+    margin-top: 0;
+  }
+
+  .contact__wa {
+    color: rgb(244 244 245 / 0.72);
+    font-size: var(--text-sm);
+  }
+
+  .contact__wa a {
+    color: var(--color-soft-lavender);
     font-weight: 500;
   }
 

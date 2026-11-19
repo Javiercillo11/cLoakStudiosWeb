@@ -28,6 +28,7 @@ const links = [
         {site.email && (
           <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
         )}
+        <li><a href={site.founder.portfolioUrl} rel="noopener" target="_blank">Portafolio</a></li>
         {site.social.map((s) => (
           <li><a href={s.href} rel="me noopener" target="_blank">{s.label}</a></li>
         ))}
@@ -39,7 +40,7 @@ const links = [
     <p>© <span data-year>{year}</span> {site.name}</p>
     <ul role="list" class="site-footer__legal">
       <li><a href={withBase('/privacidad')}>Política de privacidad</a></li>
-      {site.legalNoticeHref && <li><a href={site.legalNoticeHref}>Aviso legal</a></li>}
+      {site.legalNoticeHref && <li><a href={withBase(site.legalNoticeHref)}>Aviso legal</a></li>}
     </ul>
   </div></div>
 </footer>
