@@ -9,8 +9,8 @@ export const site = {
     'Creamos páginas web para negocios, aplicaciones de gestión y soluciones QR para reseñas. Cuéntanos qué necesita tu negocio.',
   tagline: 'Digital solutions for ambitious businesses.',
 
-  /** PENDIENTE: email de contacto público real. Si es null, no se muestra. */
-  email: null as string | null,
+  /** Email de contacto público. Si es null, no se muestra. */
+  email: 'fjsanchezv2001@gmail.com' as string | null,
 
   /** WhatsApp. Si `phone` es null, el botón y los enlaces no se muestran. */
   whatsapp: {
@@ -36,25 +36,25 @@ export const site = {
 
 /**
  * Datos del titular para el aviso legal y la política de privacidad (LSSI y RGPD).
- * PENDIENTE: mientras falte alguno, las páginas legales lo marcan como pendiente,
+ * Si falta alguno, las páginas legales lo marcan como pendiente,
  * se publican con noindex y quedan fuera del sitemap.
  */
 export const legal = {
   /** Nombre completo (autónomo) o razón social (sociedad). */
-  holder: null as string | null,
-  holderType: null as 'autonomo' | 'sociedad' | null,
-  taxId: null as string | null,
-  address: null as string | null,
+  holder: 'Francisco Javier Sánchez Vargas' as string | null,
+  holderType: 'autonomo' as 'autonomo' | 'sociedad' | null,
+  taxId: '04234068K' as string | null,
+  address: 'C/ Río Marchés, portal 5, 3.º B, 45007 Toledo' as string | null,
   /** Solo sociedades: datos de inscripción en el Registro Mercantil. */
   registry: null as string | null,
   /** Teléfono de contacto del aviso legal. */
   phone: '+34 678 494 955' as string | null,
   /** Región del proyecto de Supabase, p. ej. «Unión Europea (Fráncfort)». */
-  supabaseRegion: null as string | null,
+  supabaseRegion: 'Unión Europea (Fráncfort, Alemania)' as string | null,
   /** Meses que se conservan las solicitudes que no acaban en proyecto. */
   leadRetentionMonths: 12,
   /** Fecha de la última revisión de los textos legales, p. ej. «19 de noviembre de 2026». */
-  updatedAt: null as string | null,
+  updatedAt: '19 de noviembre de 2026' as string | null,
 };
 
 /** ¿Están todos los datos legales? Hasta entonces, las páginas legales son un borrador. */
