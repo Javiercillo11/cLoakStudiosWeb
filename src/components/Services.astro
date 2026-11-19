@@ -14,7 +14,7 @@ const glow = ['135deg', '160deg', '205deg'];
   <div class="frame">
     <div class="frame__row">
       <header class="services__head" data-reveal>
-        <h2 id="services-title">Soluciones digitales para<br /> hacer crecer tu negocio.</h2>
+        <h2 id="services-title">Soluciones digitales para<br class="br-wide" /> hacer crecer tu negocio.</h2>
         <p class="services__lead">
           Diseñamos y desarrollamos herramientas digitales que<br class="br-wide" /> resuelven necesidades reales de tu negocio.
         </p>
@@ -277,6 +277,16 @@ const glow = ['135deg', '160deg', '205deg'];
     .card__cta {
       font-size: 0.875rem;
       padding-block: 0.65rem;
+    }
+  }
+
+  /* Pantallas muy estrechas: el CTA ocupa el ancho y no se parte en dos líneas */
+  @media (max-width: 23.99rem) {
+    .card__cta {
+      align-self: stretch;
+      justify-content: space-between;
+      white-space: nowrap;
+      padding-inline: 1rem;
     }
   }
 

@@ -26,7 +26,7 @@ const href = whatsappUrl(site.whatsapp.phone, site.whatsapp.message);
 }
 
 <script>
-  // En móvil, el botón se oculta mientras el formulario está en pantalla para no tapar «Enviar».
+  // El botón se oculta mientras el formulario está en pantalla para no tapar campos ni «Enviar».
   const fab = document.querySelector<HTMLElement>('[data-wa-fab]');
   const form = document.querySelector('[data-contact-form]')?.closest('.contact__panel') ?? document.querySelector('[data-contact-form]');
   if (fab && form && 'IntersectionObserver' in window) {
@@ -74,12 +74,12 @@ const href = whatsappUrl(site.whatsapp.phone, site.whatsapp.message);
     }
   }
 
-  @media (max-width: 47.99rem) {
-    .wa-fab.is-over-form {
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(0.75rem);
-    }
+  /* Sobre el formulario se oculta en todos los anchos: taparía campos o el texto junto a «Enviar»
+     (allí ya está el enlace «¿Prefieres WhatsApp?»). */
+  .wa-fab.is-over-form {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(0.75rem);
   }
 
   @media (prefers-reduced-motion: reduce) {
