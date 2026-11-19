@@ -1,5 +1,6 @@
 import {
   businessRequired,
+  buildLeadPayload,
   buildPayload,
   readValues,
   SERVICE_IDS,
@@ -8,7 +9,7 @@ import {
   type FieldName,
   type ServiceId,
 } from '../lib/contact/schema';
-import { resolveMode, submitContact, type SubmitMode } from '../lib/contact/submit';
+import { resolveMode, submitContact, supabaseTarget, type SubmitMode } from '../lib/contact/submit';
 
 /** Campo lógico → id del control en el DOM. */
 const FIELD_IDS: Record<FieldName, string> = {
@@ -60,9 +61,10 @@ export function initContactForm() {
   const messageLabel = form.querySelector<HTMLElement>('[data-field="cf-message"] [data-label-text]')!;
   const businessInput = form.querySelector<HTMLInputElement>('#cf-business')!;
 
-  // La clave y el modo se fijan en build. El modo prueba solo existe en desarrollo.
-  const accessKey = import.meta.env.PUBLIC_WEB3FORMS_ACCESS_KEY ?? '';
-  const mode: SubmitMode = resolveMode(accessKey, import.meta.env.DEV);
+  // Las claves y el modo se fijan en build. El modo prueba solo existe en desarrollo.
+  const accessKey = (import.meta.env.PUBLIC_WEB3FORMS_ACCESS_KEY ?? '').trim();
+  const supabase = supabaseTarget(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
+  const mode: SubmitMode = resolveMode({ web3forms: !!accessKey, supabase: !!supabase }, import.meta.env.DEV);
 
   // Con JS activo, la validación y el envío los gestiona este script.
   form.noValidate = true;
@@ -236,11 +238,19 @@ export function initContactForm() {
     }
 
     setSubmitting(true);
-    const result = await submitContact(buildPayload(values, accessKey), mode);
+    const result = await submitContact(
+      {
+        web3forms: accessKey ? buildPayload(values, accessKey) : undefined,
+        supabase: supabase ? { ...supabase, args: buildLeadPayload(values) } : undefined,
+      },
+      mode,
+    );
     setSubmitting(false);
 
     if (result.ok) {
       if (!result.test) recordSubmission();
+      // Uno de los dos canales falló, pero la solicitud llegó por el otro.
+      if (result.failed) console.warn('[contacto] Canal de envío con error:', result.failed);
       form.reset();
       touched.clear();
       submittedOnce = false;

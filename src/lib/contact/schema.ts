@@ -261,3 +261,20 @@ export function buildPayload(v: ContactValues, accessKey: string, receivedAt: Da
   });
   return payload;
 }
+
+/**
+ * Argumentos de la función submit_lead de Supabase (app de gestión).
+ * Los detalles van como lista ordenada {label, value}: jsonb no conserva el orden de las claves.
+ */
+export function buildLeadPayload(v: ContactValues) {
+  return {
+    p_service: v.service,
+    p_name: v.name,
+    p_email: v.email,
+    p_message: v.message,
+    p_business: v.business,
+    p_phone: v.phone,
+    p_details: serviceDetails(v).map(([label, value]) => ({ label, value })),
+    p_botcheck: v.botcheck,
+  };
+}

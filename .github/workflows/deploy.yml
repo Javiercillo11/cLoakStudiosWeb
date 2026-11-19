@@ -35,6 +35,9 @@ jobs:
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
           # Variable del repositorio (no secreto: la access key de Web3Forms es pública).
           PUBLIC_WEB3FORMS_ACCESS_KEY: ${{ vars.PUBLIC_WEB3FORMS_ACCESS_KEY }}
+          # Solicitudes en la app (Supabase). La anon key también es pública por diseño.
+          PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
+          PUBLIC_SUPABASE_ANON_KEY: ${{ vars.PUBLIC_SUPABASE_ANON_KEY }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

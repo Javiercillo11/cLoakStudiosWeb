@@ -5,15 +5,19 @@ import Field from './form/Field.astro';
 import ChoiceGroup from './form/ChoiceGroup.astro';
 import Icon from './Icon.astro';
 import { LIMITS, MESSAGE_MIN, OPTIONS, SERVICE_IDS, SERVICE_LABELS } from '../lib/contact/schema';
-import { resolveMode, WEB3FORMS_ENDPOINT } from '../lib/contact/submit';
+import { resolveMode, supabaseTarget, WEB3FORMS_ENDPOINT } from '../lib/contact/submit';
 
-const accessKey = import.meta.env.PUBLIC_WEB3FORMS_ACCESS_KEY;
-const mode = resolveMode(accessKey, import.meta.env.DEV);
+const accessKey = (import.meta.env.PUBLIC_WEB3FORMS_ACCESS_KEY ?? '').trim();
+const hasSupabase = !!supabaseTarget(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
+const mode = resolveMode({ web3forms: !!accessKey, supabase: hasSupabase }, import.meta.env.DEV);
 
-if (mode === 'disabled') {
-  console.warn(
-    '\n[contacto] PUBLIC_WEB3FORMS_ACCESS_KEY no está definida: el formulario se publicará con el envío desactivado.\n',
-  );
+if (!import.meta.env.DEV) {
+  if (mode === 'disabled') {
+    console.warn('\n[contacto] No hay ningún canal de envío configurado: el formulario se publicará desactivado.\n');
+  } else {
+    if (!accessKey) console.warn('\n[contacto] Falta PUBLIC_WEB3FORMS_ACCESS_KEY: las solicitudes no llegarán por email.\n');
+    if (!hasSupabase) console.warn('\n[contacto] Faltan PUBLIC_SUPABASE_URL / PUBLIC_SUPABASE_ANON_KEY: las solicitudes no llegarán a la app.\n');
+  }
 }
 
 const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
@@ -30,7 +34,7 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
   data-contact-form
   data-mode={mode}
   method="post"
-  action={mode === 'live' ? WEB3FORMS_ENDPOINT : undefined}
+  action={mode === 'live' && accessKey ? WEB3FORMS_ENDPOINT : undefined}
   aria-labelledby="contact-title"
 >
   {
@@ -38,8 +42,8 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
       <div class="notice notice--test" role="note">
         <span class="notice__tag">Modo prueba</span>
         <p>
-          Falta <code>PUBLIC_WEB3FORMS_ACCESS_KEY</code>. El formulario valida los datos y muestra la solicitud en la
-          consola del navegador, pero <strong>no envía ningún email</strong>.
+          Faltan <code>PUBLIC_WEB3FORMS_ACCESS_KEY</code> y las variables de Supabase. El formulario valida los datos y
+          muestra la solicitud en la consola del navegador, pero <strong>no envía nada</strong>.
         </p>
       </div>
     )
@@ -57,7 +61,7 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
   }
 
   {
-    mode === 'live' && (
+    mode === 'live' && accessKey && (
       <>
         <input type="hidden" name="access_key" value={accessKey} />
         <input type="hidden" name="subject" value="Nueva solicitud desde cLoak Studios" />
