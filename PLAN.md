@@ -29,13 +29,17 @@ Proyectos implicados:
 | 4 | ✅ Pantalla «Solicitudes» desplegada en la app |
 | 5 | ✅ Variables de Supabase creadas en el repo de la web |
 | 6 | ✅ Envío a Supabase desplegado en la web |
-| 7 | ⏳ Prueba de Javier: formulario → app + email; honeypot; WhatsApp en el móvil |
-| 8+ | Pendiente (fase 3 · Push) |
+| 7 | ⏳ Prueba de Javier: formulario → app + email; WhatsApp en el móvil |
+| 8 | ✅ Claves VAPID generadas; pública en la variable `VITE_VAPID_PUBLIC_KEY` del repo de la app. ⏳ Javier: guardar los secretos en Supabase |
+| 9 | ✅ Código desplegado en la app (tabla `007_push.sql`, botón de avisos, `sw.js`, Edge Function `notify-new-lead`). ⏳ Javier: ejecutar `007_push.sql`, desplegar la función y crear el webhook (README de la app → «Avisos push») |
+| 10 | ⏳ Prueba de Javier: instalar la PWA, activar avisos, enviar el formulario y ver la notificación |
+| 11+ | Pendiente (fase 4 · Trabajos) |
 
 Cambios respecto al plan original:
 
 - `details` se guarda como lista `[{label, value}]`, porque jsonb no conserva el orden de las claves.
 - El borrado automático es **diario** y elimina las solicitudes **no convertidas** con 12 meses sin actividad (no solo las descartadas), que es lo que dice la política de privacidad.
+- Las migraciones se numeran por orden de ejecución: `007_push`, `008_portfolio`, `009_testimonials`.
 - Mientras falten datos legales, `/aviso-legal` y `/privacidad` se publican con `noindex` y fuera del sitemap de forma automática (`legalComplete`).
 
 ## Decisiones tomadas
@@ -209,7 +213,7 @@ Poner una **Supabase Edge Function** con **Cloudflare Turnstile** (un captcha in
 
 **Objetivo:** marcar un proyecto en la app como "Publicar en la web" y que aparezca solo en una sección "Trabajos" de la web, sin tocar el código de la web.
 
-### 5.A · Base de datos (cLoakStudiosApp → `007_portfolio.sql`)
+### 5.A · Base de datos (cLoakStudiosApp → `008_portfolio.sql`)
 
 1. Columnas nuevas en `projects`:
    - `published boolean not null default false`
@@ -249,7 +253,7 @@ Poner una **Supabase Edge Function** con **Cloudflare Turnstile** (un captcha in
 ### Lo que te tocará hacer a ti
 
 - Crear el token de GitHub (fine-grained, solo el repo de la web, permiso *Contents: read & write*) y guardarlo en Supabase → Edge Functions → Secrets.
-- Ejecutar la migración `007_portfolio.sql`.
+- Ejecutar la migración `008_portfolio.sql`.
 
 ---
 
@@ -257,7 +261,7 @@ Poner una **Supabase Edge Function** con **Cloudflare Turnstile** (un captcha in
 
 **Objetivo:** al terminar un proyecto, el cliente deja su opinión desde un enlace único. Tú la apruebas en la app y aparece en la web.
 
-### 6.A · Base de datos (cLoakStudiosApp → `008_testimonials.sql`)
+### 6.A · Base de datos (cLoakStudiosApp → `009_testimonials.sql`)
 
 1. **Tabla `testimonials`**:
    - `id`, `user_id`, `project_id`
@@ -295,7 +299,7 @@ Poner una **Supabase Edge Function** con **Cloudflare Turnstile** (un captcha in
 
 **Objetivo:** que te llegue una notificación al móvil en cuanto alguien envía el formulario, sin depender del email.
 
-### 7.A · Base de datos (cLoakStudiosApp → incluido en `006_leads.sql` o en una `009_push.sql` aparte)
+### 7.A · Base de datos (cLoakStudiosApp → `007_push.sql`)
 
 1. **Tabla `push_subscriptions`**: `id`, `user_id`, `endpoint` (único), `p256dh`, `auth`, `device_label`, `created_at`, `last_used_at`. RLS `owner_all`.
 
@@ -335,10 +339,10 @@ Poner una **Supabase Edge Function** con **Cloudflare Turnstile** (un captcha in
 | 3 · Push | 8 | Generar claves VAPID; guardar la privada en Supabase y la pública en el repo de la app | Claude / **Javier** |
 | | 9 | Tabla de suscripciones + botón de avisos + `sw.js` + Edge Function `notify-new-lead` + webhook | Claude / **Javier** (webhook) |
 | | 10 | Prueba: instalar la PWA, activar avisos, enviar el formulario y comprobar que llega la notificación | **Javier** |
-| 4 · Trabajos | 11 | Ejecutar `007_portfolio.sql`; crear el token de GitHub y guardarlo en Supabase | **Javier** |
+| 4 · Trabajos | 11 | Ejecutar `008_portfolio.sql`; crear el token de GitHub y guardarlo en Supabase | **Javier** |
 | | 12 | Sección "Publicar en la web" en la app + `Work.astro` en la web + Edge Function `trigger-web-deploy` + webhook | Claude / **Javier** (webhook) |
 | | 13 | Prueba: publicar un proyecto y comprobar que la web se redespliega y lo muestra | **Javier** |
-| 5 · Testimonios | 14 | Ejecutar `008_testimonials.sql` | **Javier** |
+| 5 · Testimonios | 14 | Ejecutar `009_testimonials.sql` | **Javier** |
 | | 15 | "Pedir opinión" + pantalla "Opiniones" en la app; página `/opinion` + sección de testimonios en la web | Claude |
 | | 16 | Prueba: generar un enlace, dejar una opinión, aprobarla y comprobar que aparece en la web | **Javier** |
 
