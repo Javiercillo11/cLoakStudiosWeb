@@ -23,13 +23,14 @@ Proyectos implicados:
 | Paso | Estado |
 |---|---|
 | 0 | ✅ Commit de recursos de marca y del plan |
-| 1 | ⏳ Esperando datos legales de Javier |
-| 2 | ✅ Hecho en local (commit `66c524f`), **sin desplegar** hasta tener los datos legales. Se rellenan en `legal` y `site.email` de `src/data/site.ts` |
-| 3 | ⏳ Javier: ejecutar `cLoakStudiosApp/supabase/migrations/006_leads.sql` (probada en Postgres 15 local) |
-| 4 | ✅ Hecho en local en la app (commit `2533e6a`), **sin desplegar** hasta ejecutar la migración |
-| 5 | ⏳ Javier: variables `PUBLIC_SUPABASE_URL` y `PUBLIC_SUPABASE_ANON_KEY` en el repo de la web |
-| 6 | ✅ Hecho en local (commit `852d4b3`), **sin desplegar**. Sin las variables, la web sigue enviando solo a Web3Forms |
-| 7+ | Pendiente |
+| 1 | ✅ Datos legales recibidos |
+| 2 | ✅ Desplegado (aviso legal, privacidad, email, WhatsApp, «Sobre mí») |
+| 3 | ✅ Migración `006_leads.sql` ejecutada |
+| 4 | ✅ Pantalla «Solicitudes» desplegada en la app |
+| 5 | ✅ Variables de Supabase creadas en el repo de la web |
+| 6 | ✅ Envío a Supabase desplegado en la web |
+| 7 | ⏳ Prueba de Javier: formulario → app + email; honeypot; WhatsApp en el móvil |
+| 8+ | Pendiente (fase 3 · Push) |
 
 Cambios respecto al plan original:
 
