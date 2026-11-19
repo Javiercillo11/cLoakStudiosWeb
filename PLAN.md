@@ -18,6 +18,25 @@ Proyectos implicados:
 - **cLoakStudiosApp** (`~/projects/cLoakStudiosApp`): app privada de gestión, React + Vite + Supabase, GitHub Pages.
 - **portafolio** (`~/projects/portafolio`): portafolio personal, publicado en https://javiercillo11.github.io/portafolio/
 
+## Progreso
+
+| Paso | Estado |
+|---|---|
+| 0 | ✅ Commit de recursos de marca y del plan |
+| 1 | ⏳ Esperando datos legales de Javier |
+| 2 | ✅ Hecho en local (commit `66c524f`), **sin desplegar** hasta tener los datos legales. Se rellenan en `legal` y `site.email` de `src/data/site.ts` |
+| 3 | ⏳ Javier: ejecutar `cLoakStudiosApp/supabase/migrations/006_leads.sql` (probada en Postgres 15 local) |
+| 4 | ✅ Hecho en local en la app (commit `2533e6a`), **sin desplegar** hasta ejecutar la migración |
+| 5 | ⏳ Javier: variables `PUBLIC_SUPABASE_URL` y `PUBLIC_SUPABASE_ANON_KEY` en el repo de la web |
+| 6 | ✅ Hecho en local (commit `852d4b3`), **sin desplegar**. Sin las variables, la web sigue enviando solo a Web3Forms |
+| 7+ | Pendiente |
+
+Cambios respecto al plan original:
+
+- `details` se guarda como lista `[{label, value}]`, porque jsonb no conserva el orden de las claves.
+- El borrado automático es **diario** y elimina las solicitudes **no convertidas** con 12 meses sin actividad (no solo las descartadas), que es lo que dice la política de privacidad.
+- Mientras falten datos legales, `/aviso-legal` y `/privacidad` se publican con `noindex` y fuera del sitemap de forma automática (`legalComplete`).
+
 ## Decisiones tomadas
 
 | Tema | Decisión |
