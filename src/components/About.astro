@@ -40,7 +40,10 @@ const glow = ['135deg', '205deg', '160deg', '225deg'];
           ))
         }
       </ul>
+    </div>
 
+    {/* Fila propia, fuera de la rejilla: así la columna fija (sticky) de la izquierda no la tapa al hacer scroll */}
+    <div class="frame__row founder-row">
       <aside class="founder neon-card" aria-labelledby="founder-title" data-reveal style="--glow-angle:150deg">
         <div class="founder__who">
           <p class="founder__eyebrow">Quién hay detrás</p>
@@ -88,6 +91,16 @@ const glow = ['135deg', '205deg', '160deg', '225deg'];
     box-shadow:
       0 0 18px -6px rgb(139 92 246 / 0.7),
       inset 0 0 10px -4px rgb(139 92 246 / 0.5);
+  }
+
+  .founder-row {
+    margin-top: var(--space-10);
+  }
+
+  @media (min-width: 64rem) {
+    .founder-row {
+      margin-top: var(--space-12);
+    }
   }
 
   .founder {
@@ -213,7 +226,6 @@ const glow = ['135deg', '205deg', '160deg', '225deg'];
 
     /* Fila propia bajo las dos columnas: quién · presentación · portafolio */
     .founder {
-      grid-column: 1 / -1;
       grid-template-columns: minmax(12rem, 0.7fr) minmax(0, 1.6fr) auto;
       gap: var(--space-10);
       padding: 1.6rem 2rem;
