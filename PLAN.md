@@ -16,7 +16,7 @@ Proyectos implicados:
 
 - **cLoakStudiosWeb** (`~/projects/cLoakStudiosWeb`): web pública, Astro estático, GitHub Pages, dominio `cloakstudios.app`.
 - **cLoakStudiosApp** (`~/projects/cLoakStudiosApp`): app privada de gestión, React + Vite + Supabase, GitHub Pages.
-- **portafolio** (`~/projects/portafolio`): portafolio personal, publicado en https://javiercillo11.github.io/portafolio/
+- **portafolio** (`~/projects/portafolio`): portafolio personal, publicado en https://javiercillo11.github.io/portfolio/
 
 ## Progreso
 
@@ -50,7 +50,7 @@ Cambios respecto al plan original:
 | Mensaje de WhatsApp | "Hola, quería pedir información" (el mismo para todos los servicios) |
 | Email de Web3Forms | Se mantiene, además de guardar en Supabase |
 | "Sobre mí" | En la web pública (no en la app) |
-| URL del portafolio | https://javiercillo11.github.io/portafolio/ |
+| URL del portafolio | https://javiercillo11.github.io/portfolio/ |
 
 ---
 
@@ -153,7 +153,7 @@ Poner una **Supabase Edge Function** con **Cloudflare Turnstile** (un captcha in
    founder: {
      name: 'Javier Sánchez',
      role: 'Full Stack Developer',
-     portfolioUrl: 'https://javiercillo11.github.io/portafolio/',
+     portfolioUrl: 'https://javiercillo11.github.io/portfolio/',
    },
    social: [
      { label: 'GitHub', href: 'https://github.com/Javiercillo11' },

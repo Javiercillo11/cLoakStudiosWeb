@@ -22,7 +22,7 @@ export const site = {
   founder: {
     name: 'Javier Sánchez',
     role: 'Full Stack Developer',
-    portfolioUrl: 'https://javiercillo11.github.io/portafolio/',
+    portfolioUrl: 'https://javiercillo11.github.io/portfolio/',
   },
 
   social: [

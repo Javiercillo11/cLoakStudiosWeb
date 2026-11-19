@@ -25,21 +25,6 @@ const glow = ['135deg', '205deg', '160deg', '225deg'];
         <blockquote class="about__quote">
           <p>Build beyond the visible.</p>
         </blockquote>
-
-        <aside class="founder neon-card" aria-labelledby="founder-title" style="--glow-angle:150deg">
-          <p class="founder__eyebrow">Quién hay detrás</p>
-          <h3 id="founder-title" class="founder__name">{founder.name}</h3>
-          <p class="founder__role">{founder.role}</p>
-          <p class="founder__text">
-            Detrás de cLoak Studios está {firstName}, desarrollador full stack. Se encarga de cada proyecto de principio
-            a fin: desde la primera conversación hasta el diseño, el desarrollo y la puesta en marcha.
-          </p>
-          <a class="founder__link" href={founder.portfolioUrl} target="_blank" rel="noopener">
-            Ver portafolio
-            <Icon name="arrow-right" size={16} />
-            <span class="visually-hidden">(se abre en una pestaña nueva)</span>
-          </a>
-        </aside>
       </div>
 
       <ul role="list" class="pillars">
@@ -55,6 +40,23 @@ const glow = ['135deg', '205deg', '160deg', '225deg'];
           ))
         }
       </ul>
+
+      <aside class="founder neon-card" aria-labelledby="founder-title" data-reveal style="--glow-angle:150deg">
+        <div class="founder__who">
+          <p class="founder__eyebrow">Quién hay detrás</p>
+          <h3 id="founder-title" class="founder__name">{founder.name}</h3>
+          <p class="founder__role">{founder.role}</p>
+        </div>
+        <p class="founder__text">
+          Detrás de cLoak Studios está {firstName}, desarrollador full stack. Se encarga de cada proyecto de principio
+          a fin: desde la primera conversación hasta el diseño, el desarrollo y la puesta en marcha.
+        </p>
+        <a class="founder__link" href={founder.portfolioUrl} target="_blank" rel="noopener">
+          Ver portafolio
+          <Icon name="arrow-right" size={16} />
+          <span class="visually-hidden">(se abre en una pestaña nueva)</span>
+        </a>
+      </aside>
     </div>
   </div>
 </section>
@@ -90,9 +92,14 @@ const glow = ['135deg', '205deg', '160deg', '225deg'];
 
   .founder {
     display: grid;
-    gap: var(--space-2);
-    margin-top: var(--space-6);
+    gap: var(--space-3);
+    align-items: center;
     padding: 1.4rem 1.35rem 1.5rem;
+  }
+
+  .founder__who {
+    display: grid;
+    gap: var(--space-2);
   }
 
   .founder__eyebrow {
@@ -117,7 +124,6 @@ const glow = ['135deg', '205deg', '160deg', '225deg'];
   }
 
   .founder__text {
-    margin-top: var(--space-2);
     font-size: 0.9375rem;
     line-height: 1.55;
     color: rgb(244 244 245 / 0.75);
@@ -128,7 +134,7 @@ const glow = ['135deg', '205deg', '160deg', '225deg'];
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
-    margin-top: var(--space-3);
+    white-space: nowrap;
     padding: 0.55rem 1.1rem;
     border: 1px solid rgb(139 92 246 / 0.6);
     border-radius: var(--radius-pill);
@@ -203,6 +209,14 @@ const glow = ['135deg', '205deg', '160deg', '225deg'];
     .about__intro {
       position: sticky;
       top: calc(var(--header-height) + var(--space-10));
+    }
+
+    /* Fila propia bajo las dos columnas: quién · presentación · portafolio */
+    .founder {
+      grid-column: 1 / -1;
+      grid-template-columns: minmax(12rem, 0.7fr) minmax(0, 1.6fr) auto;
+      gap: var(--space-10);
+      padding: 1.6rem 2rem;
     }
   }
 </style>
