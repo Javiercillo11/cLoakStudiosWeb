@@ -1,26 +1,47 @@
 ---
 import { isHomePath, withBase } from '../lib/paths';
+import { getLang, homePath, ui } from '../i18n/ui';
 import Logo from './Logo.astro';
+import { Image } from 'astro:assets';
+import planet from '../assets/cosmos/planet-horizon.webp';
 import { site } from '../data/site';
 
+const lang = getLang(Astro);
+const t = ui[lang];
 const isHome = isHomePath(Astro.url.pathname);
-const link = (href: string) => (isHome ? href : withBase(`/${href}`));
+const link = (href: string) => (isHome ? href : `${homePath(lang)}${href}`);
 const year = new Date().getFullYear();
 const links = [
-  { label: 'Inicio', href: link('#inicio') },
-  { label: 'Servicios', href: link('#servicios') },
-  { label: 'Contacto', href: link('#contacto') },
+  { label: t.footer.links.home, href: link('#inicio') },
+  { label: t.footer.links.services, href: link('#servicios') },
+  { label: t.footer.links.contact, href: link('#contacto') },
 ];
 ---
 
 <footer class="site-footer">
+  <!-- Planeta de llegada: cierra el viaje que empieza en la superficie lunar del hero -->
+  <div class="planet-wrap" aria-hidden="true">
+    <Image
+      src={planet}
+      alt=""
+      class="planet"
+      widths={[1200, 1800, 2400]}
+      sizes="max(100vw, 1500px)"
+      quality={88}
+      format="webp"
+      loading="lazy"
+      decoding="async"
+    />
+    <span class="planet__dawn"></span>
+  </div>
+
   <div class="frame"><div class="frame__row site-footer__grid">
     <div class="site-footer__brand">
-      <Logo href={link('#inicio')} size={30} />
-      <p class="site-footer__tagline">{site.tagline}</p>
+      <Logo href={link('#inicio')} size={30} label={t.logoLabel} />
+      <p class="site-footer__tagline">{t.tagline}</p>
     </div>
 
-    <nav aria-label="Pie de página" class="site-footer__nav">
+    <nav aria-label={t.footer.navLabel} class="site-footer__nav">
       <ul role="list">
         {links.map((l) => (
           <li><a href={l.href}>{l.label}</a></li>
@@ -28,7 +49,7 @@ const links = [
         {site.email && (
           <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
         )}
-        <li><a href={site.founder.portfolioUrl} rel="noopener" target="_blank">Portafolio</a></li>
+        <li><a href={site.founder.portfolioUrl} rel="noopener" target="_blank">{t.footer.links.portfolio}</a></li>
         {site.social.map((s) => (
           <li><a href={s.href} rel="me noopener" target="_blank">{s.label}</a></li>
         ))}
@@ -39,8 +60,8 @@ const links = [
   <div class="frame"><div class="frame__row site-footer__bottom">
     <p>© <span data-year>{year}</span> {site.name}</p>
     <ul role="list" class="site-footer__legal">
-      <li><a href={withBase('/privacidad')}>Política de privacidad</a></li>
-      {site.legalNoticeHref && <li><a href={withBase(site.legalNoticeHref)}>Aviso legal</a></li>}
+      <li><a href={withBase('/privacidad')} hreflang="es">{t.footer.privacy}</a></li>
+      {site.legalNoticeHref && <li><a href={withBase(site.legalNoticeHref)} hreflang="es">{t.footer.legal}</a></li>}
     </ul>
   </div></div>
 </footer>
@@ -53,22 +74,84 @@ const links = [
 <style>
   .site-footer {
     position: relative;
-    padding-block: var(--space-16) var(--space-8);
+    isolation: isolate;
+    overflow-x: clip;
+    padding-block: calc(var(--space-16) + 2.5rem) var(--space-8);
     color: rgb(244 244 245 / 0.65);
     font-size: var(--text-sm);
+    /* Cielo a los lados del planeta: el mismo violeta y unas pocas estrellas */
     background:
-      radial-gradient(60% 120% at 50% 0%, rgb(109 40 217 / 0.14), transparent 70%),
+      radial-gradient(1px 1px at 8% 18%, rgb(255 255 255 / 0.7), transparent),
+      radial-gradient(1px 1px at 22% 6%, rgb(221 214 254 / 0.6), transparent),
+      radial-gradient(1.2px 1.2px at 81% 12%, rgb(255 255 255 / 0.75), transparent),
+      radial-gradient(1px 1px at 93% 30%, rgb(221 214 254 / 0.55), transparent),
+      radial-gradient(1px 1px at 64% 4%, rgb(255 255 255 / 0.5), transparent),
       var(--color-space);
   }
 
-  /* Línea neón superior */
-  .site-footer::before {
+  /*
+   * Planeta: esfera enorme centrada cuya curvatura asoma 3rem por encima del
+   * footer. Borde iluminado en violeta, atmósfera que brilla hacia arriba y una
+   * superficie (ruido fractal) que gira muy despacio.
+   */
+  /* Recorta el planeta al footer, dejando 13rem por encima para la atmósfera */
+  .planet-wrap {
+    position: absolute;
+    z-index: -1;
+    inset: -13rem 0 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  /*
+   * Planeta (render 3D de scripts/build-planet.mjs): el limbo está a y=120 de
+   * 2400 px de ancho (5 %). Se coloca para que asome 3rem por encima del footer.
+   */
+  .planet {
+    --pw: max(100vw, 1500px);
+    position: absolute;
+    left: 50%;
+    top: calc(10rem - var(--pw) * 0.05);
+    width: var(--pw);
+    max-width: none;
+    height: auto;
+    translate: -50% 0;
+  }
+
+  /* Velo de sombra en la cara nocturna: el texto del footer siempre se lee */
+  .planet-wrap::after {
     content: '';
     position: absolute;
-    inset: 0 0 auto;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #8b5cf6 25%, #ddd6fe 50%, #8b5cf6 75%, transparent);
-    box-shadow: 0 0 14px 1px rgb(139 92 246 / 0.6);
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 45%, rgb(7 4 26 / 0.55));
+  }
+
+  /* Amanecer: la luz tras el filo respira despacio */
+  .planet__dawn {
+    position: absolute;
+    left: 50%;
+    top: calc(10rem - 7rem);
+    width: min(70vw, 60rem);
+    height: 12rem;
+    translate: -50% 0;
+    background: radial-gradient(50% 50% at 50% 60%, rgb(167 139 250 / 0.35), transparent 70%);
+    mix-blend-mode: screen;
+    animation: planet-dawn 8s ease-in-out infinite alternate;
+  }
+
+  @keyframes planet-dawn {
+    from {
+      opacity: 0.35;
+    }
+    to {
+      opacity: 0.9;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .planet__dawn {
+      animation: none;
+    }
   }
 
   .site-footer__grid {

@@ -2,39 +2,35 @@
 import ContactForm from './ContactForm.astro';
 import Icon from './Icon.astro';
 import Nebula from './Nebula.astro';
+import OrbitLink from './OrbitLink.astro';
 import { site } from '../data/site';
 import { whatsappUrl } from '../lib/whatsapp';
+import { getLang, ui } from '../i18n/ui';
 
-const whatsapp = whatsappUrl(site.whatsapp.phone, site.whatsapp.message);
-
-const next = [
-  'Revisamos tu solicitud y el servicio que has elegido.',
-  'Te escribimos al email que nos indiques para concretar detalles.',
-  'Si encaja, preparamos una propuesta con alcance y plazos.',
-];
+const lang = getLang(Astro);
+const t = ui[lang].contact;
+const whatsapp = whatsappUrl(site.whatsapp.phone, ui[lang].whatsapp.message);
+const next = t.next;
 ---
 
 <section class="space-section contact" id="contacto" aria-labelledby="contact-title" data-cosmos-anchor="contact">
-  <Nebula src="right" side="right" top="0" />
-  <Nebula src="left" side="left" top="45%" flipY />
+  <Nebula src="left" side="left" top="-4%" flipY opacity={0.85} depth={0.12} />
+  <OrbitLink side="right" top="-6rem" delay="-6s" />
   <div class="frame">
   <div class="frame__row contact__grid">
     <div class="contact__intro" data-reveal>
-      <p class="eyebrow">Contacto</p>
-      <h2 id="contact-title">Hablemos de tu proyecto.</h2>
-      <p class="lead">
-        Cuéntanos qué necesitas. Revisaremos tu solicitud y nos pondremos en contacto contigo para hablar de los
-        siguientes pasos.
-      </p>
+      <p class="eyebrow">{t.eyebrow}</p>
+      <h2 id="contact-title">{t.title}</h2>
+      <p class="lead">{t.lead}</p>
 
       <div class="contact__next">
-        <p class="contact__next-title">Qué pasa después</p>
+        <p class="contact__next-title">{t.nextTitle}</p>
         <ol role="list">
           {
-            next.map((t, i) => (
+            next.map((item, i) => (
               <li>
                 <span class="neon-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-                {t}
+                {item}
               </li>
             ))
           }
@@ -52,9 +48,9 @@ const next = [
             )}
             {whatsapp && (
               <p class="contact__wa">
-                ¿Prefieres WhatsApp?{' '}
+                {t.whatsappPrompt}{' '}
                 <a href={whatsapp} target="_blank" rel="noopener">
-                  Escríbenos<span class="visually-hidden"> (se abre en una pestaña nueva)</span>
+                  {t.whatsappLink}<span class="visually-hidden"> {ui[lang].about.newTab}</span>
                 </a>
               </p>
             )}

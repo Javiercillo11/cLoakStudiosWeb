@@ -30,6 +30,38 @@ const RATE_KEY = 'cloak:contact-submissions';
 const RATE_MAX = 3;
 const RATE_WINDOW_MS = 60 * 60 * 1000;
 
+// Textos dinámicos del formulario (el idioma lo fija data-lang en el <form>).
+const TEXT = {
+  es: {
+    message: 'Cuéntanos sobre tu proyecto',
+    messageOther: 'Explícanos qué necesitas',
+    submit: 'Enviar solicitud',
+    submitting: 'Enviando…',
+    invalid: (n: number) => `Revisa ${n === 1 ? 'el campo marcado' : `los ${n} campos marcados`} para poder enviar la solicitud.`,
+    rate: 'Has enviado varias solicitudes en poco tiempo. Espera un rato antes de volver a intentarlo; ya hemos recibido las anteriores.',
+    failed: 'No se ha enviado la solicitud.',
+    kept: 'Tus datos siguen en el formulario.',
+    network: 'No hemos podido conectar con el servidor. Comprueba tu conexión y vuelve a intentarlo.',
+    timeout: 'El envío está tardando demasiado. Vuelve a intentarlo en unos segundos.',
+    rejected: 'No hemos podido enviar tu solicitud en este momento. Vuelve a intentarlo en unos minutos.',
+    disabled: 'El envío online todavía no está activo. Inténtalo de nuevo más adelante.',
+  },
+  en: {
+    message: 'Tell us about your project',
+    messageOther: 'Tell us what you need',
+    submit: 'Send request',
+    submitting: 'Sending…',
+    invalid: (n: number) => `Please check ${n === 1 ? 'the highlighted field' : `the ${n} highlighted fields`} to send your request.`,
+    rate: "You've sent several requests in a short time. Please wait a while before trying again; we've already received the previous ones.",
+    failed: 'Your request was not sent.',
+    kept: 'Your details are still in the form.',
+    network: "We couldn't reach the server. Check your connection and try again.",
+    timeout: 'Sending is taking too long. Please try again in a few seconds.',
+    rejected: "We couldn't send your request right now. Please try again in a few minutes.",
+    disabled: "Online requests aren't active yet. Please try again later.",
+  },
+};
+
 const isService = (v: string | null): v is ServiceId => !!v && (SERVICE_IDS as readonly string[]).includes(v);
 
 function recentSubmissions(): number[] {
@@ -60,6 +92,8 @@ export function initContactForm() {
   const messageField = form.querySelector<HTMLTextAreaElement>('#cf-message')!;
   const messageLabel = form.querySelector<HTMLElement>('[data-field="cf-message"] [data-label-text]')!;
   const businessInput = form.querySelector<HTMLInputElement>('#cf-business')!;
+  const lang = form.dataset.lang === 'en' ? 'en' : 'es';
+  const t = TEXT[lang];
 
   // Las claves y el modo se fijan en build. El modo prueba solo existe en desarrollo.
   const accessKey = (import.meta.env.PUBLIC_WEB3FORMS_ACCESS_KEY ?? '').trim();
@@ -93,7 +127,7 @@ export function initContactForm() {
     field.querySelector<HTMLElement>('[data-optional-tag]')?.toggleAttribute('hidden', needsBusiness);
     if (!needsBusiness) touched.delete('business');
 
-    messageLabel.textContent = service === 'otro' ? 'Explícanos qué necesitas' : 'Cuéntanos sobre tu proyecto';
+    messageLabel.textContent = service === 'otro' ? t.messageOther : t.message;
     refreshErrors();
   }
 
@@ -156,7 +190,7 @@ export function initContactForm() {
   }
 
   function currentErrors(): ContactErrors {
-    return validate(readValues(new FormData(form!)));
+    return validate(readValues(new FormData(form!)), lang);
   }
 
   /** Muestra los errores de los campos visitados (o de todos tras un intento de envío). */
@@ -203,7 +237,7 @@ export function initContactForm() {
     submitBtn.disabled = on;
     submitBtn.setAttribute('aria-busy', String(on));
     form!.classList.toggle('is-submitting', on);
-    submitLabel.textContent = on ? 'Enviando…' : 'Enviar solicitud';
+    submitLabel.textContent = on ? t.submitting : t.submit;
   }
 
   form.addEventListener('submit', async (e) => {
@@ -213,12 +247,12 @@ export function initContactForm() {
     alertBox.hidden = true;
     submittedOnce = true;
     const values = readValues(new FormData(form));
-    const errors = refreshErrors(validate(values));
+    const errors = refreshErrors(validate(values, lang));
     const invalid = Object.keys(errors) as FieldName[];
 
     if (invalid.length) {
       const n = invalid.length;
-      showAlert(`Revisa ${n === 1 ? 'el campo marcado' : `los ${n} campos marcados`} para poder enviar la solicitud.`);
+      showAlert(t.invalid(n));
       // Foco al primer campo con error, en orden visual.
       const order: FieldName[] = ['service', 'name', 'business', 'email', 'phone', 'web.currentUrl', 'qr.reviewUrl', 'message', 'privacy'];
       const first = order.find((f) => errors[f])!;
@@ -231,16 +265,14 @@ export function initContactForm() {
     }
 
     if (mode !== 'test' && recentSubmissions().length >= RATE_MAX) {
-      showAlert(
-        'Has enviado varias solicitudes en poco tiempo. Espera un rato antes de volver a intentarlo; ya hemos recibido las anteriores.',
-      );
+      showAlert(t.rate);
       return;
     }
 
     setSubmitting(true);
     const result = await submitContact(
       {
-        web3forms: accessKey ? buildPayload(values, accessKey) : undefined,
+        web3forms: accessKey ? buildPayload(values, accessKey, new Date(), lang) : undefined,
         supabase: supabase ? { ...supabase, args: buildLeadPayload(values) } : undefined,
       },
       mode,
@@ -265,13 +297,7 @@ export function initContactForm() {
     }
 
     // Error recuperable: los datos escritos se conservan.
-    const messages: Record<typeof result.reason, string> = {
-      network: 'No hemos podido conectar con el servidor. Comprueba tu conexión y vuelve a intentarlo.',
-      timeout: 'El envío está tardando demasiado. Vuelve a intentarlo en unos segundos.',
-      rejected: 'No hemos podido enviar tu solicitud en este momento. Vuelve a intentarlo en unos minutos.',
-      disabled: 'El envío online todavía no está activo. Inténtalo de nuevo más adelante.',
-    };
-    showAlert(`<strong>No se ha enviado la solicitud.</strong> ${messages[result.reason]} Tus datos siguen en el formulario.`);
+    showAlert(`<strong>${t.failed}</strong> ${t[result.reason]} ${t.kept}`);
     if (result.detail) console.warn('[contacto] Respuesta del servicio de envío:', result.detail);
   });
 

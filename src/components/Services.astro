@@ -5,7 +5,13 @@ import photoWeb from '../assets/services/web.webp';
 import photoApp from '../assets/services/app.webp';
 import photoQr from '../assets/services/qr.webp';
 import Nebula from './Nebula.astro';
-import { services } from '../data/services';
+import Asteroid from './Asteroid.astro';
+import { getServices } from '../data/services';
+import { getLang, ui } from '../i18n/ui';
+
+const lang = getLang(Astro);
+const t = ui[lang].services;
+const services = getServices(lang);
 
 // Fotos de cada tarjeta (recortes de Diseño/servicios.jpeg).
 const photos = { web: photoWeb, app: photoApp, qr: photoQr } as const;
@@ -16,15 +22,14 @@ const glow = ['135deg', '160deg', '205deg'];
 
 <section class="services" id="servicios" aria-labelledby="services-title" data-cosmos-anchor="services">
   <!-- Mismo encuadre que la referencia: el título queda a y≈130 de 941 px -->
-  <Nebula src="left" side="left" top="calc(4.5rem - 7.8vw)" />
-  <Nebula src="right" side="right" top="calc(4.5rem - 7.8vw)" />
+  <Nebula src="left" side="left" top="calc(4.5rem - 7.8vw)" depth={0.1} />
+  <Nebula src="right" side="right" top="calc(4.5rem - 7.8vw)" depth={0.1} />
+  <Asteroid variant={2} top="92%" right="6%" size={46} depth={0.32} spin={80} />
   <div class="frame">
     <div class="frame__row">
       <header class="services__head" data-reveal>
-        <h2 id="services-title">Soluciones digitales para<br class="br-wide" /> hacer crecer tu negocio.</h2>
-        <p class="services__lead">
-          Diseñamos y desarrollamos herramientas digitales que<br class="br-wide" /> impulsan necesidades reales de tu negocio.
-        </p>
+        <h2 id="services-title">{t.title[0]}<br class="br-wide" /> {t.title[1]}</h2>
+        <p class="services__lead">{t.lead[0]}<br class="br-wide" /> {t.lead[1]}</p>
       </header>
 
       <ul role="list" class="services__grid">

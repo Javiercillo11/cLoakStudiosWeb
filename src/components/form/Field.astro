@@ -1,5 +1,6 @@
 ---
 // Campo de texto/textarea accesible con etiqueta, ayuda y mensaje de error.
+import { getLang, ui } from '../../i18n/ui';
 interface Props {
   id: string;
   name: string;
@@ -37,6 +38,7 @@ const {
   class: className,
 } = Astro.props;
 
+const tf = ui[getLang(Astro)].form;
 const hintId = hint ? `${id}-hint` : undefined;
 const errorId = `${id}-error`;
 const describedBy = [hintId, errorId].filter(Boolean).join(' ');
@@ -47,19 +49,19 @@ const describedBy = [hintId, errorId].filter(Boolean).join(' ');
     <span data-label-text>{label}</span>
     {
       required ? (
-        <span class="field__req">obligatorio</span>
+        <span class="field__req">{tf.required}</span>
       ) : conditionalRequired ? (
         <>
           <span class="field__req" data-conditional-req hidden>
-            obligatorio
+            {tf.required}
           </span>
           <span class="field__opt" data-optional-tag>
-            opcional
+            {tf.optional}
           </span>
         </>
       ) : (
         <span class="field__opt" data-optional-tag>
-          opcional
+          {tf.optional}
         </span>
       )
     }

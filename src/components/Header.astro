@@ -1,23 +1,26 @@
 ---
-import { isHomePath, withBase } from '../lib/paths';
+import { isHomePath } from '../lib/paths';
 import Logo from './Logo.astro';
 import Icon from './Icon.astro';
-import { nav } from '../data/site';
+import { getLang, homePath, ui, type Lang } from '../i18n/ui';
 
-// En páginas internas, los anclajes apuntan a la home.
+const lang = getLang(Astro);
+const t = ui[lang];
+const other: Lang = lang === 'es' ? 'en' : 'es';
+// En páginas internas, los anclajes apuntan a la portada de su idioma.
 const isHome = isHomePath(Astro.url.pathname);
-const link = (href: string) => (isHome ? href : withBase(`/${href}`));
+const link = (href: string) => (isHome ? href : `${homePath(lang)}${href}`);
 ---
 
-<header class="site-header" data-header>
+<header class="site-header" data-header data-menu-open-label={t.menuOpen} data-menu-close-label={t.menuClose}>
   <div class="frame">
    <div class="frame__row site-header__inner">
-    <Logo href={link('#inicio')} size={32} />
+    <Logo href={link('#inicio')} size={32} label={t.logoLabel} />
 
-    <nav class="site-nav" aria-label="Principal">
+    <nav class="site-nav" aria-label={t.navLabel}>
       <ul role="list" class="site-nav__list">
         {
-          nav.map((item) => (
+          t.nav.map((item) => (
             <li>
               <a href={link(item.href)} class="site-nav__link" data-nav-link={item.href}>
                 {item.label}
@@ -30,8 +33,20 @@ const link = (href: string) => (isHome ? href : withBase(`/${href}`));
 
     <div class="site-header__actions">
       <a href={link('#contacto')} class="header-cta">
-        Hablemos
+        {t.headerCta}
         <Icon name="arrow-right" size={16} />
+      </a>
+      <!-- Selector de idioma: lleva a la misma sección en el otro idioma -->
+      <a
+        href={homePath(other)}
+        class="lang-switch"
+        hreflang={other}
+        lang={other}
+        aria-label={t.langSwitchTo}
+        data-lang-switch
+      >
+        <span class:list={['lang-switch__opt', { 'is-active': lang === 'es' }]} aria-hidden="true">ES</span>
+        <span class:list={['lang-switch__opt', { 'is-active': lang === 'en' }]} aria-hidden="true">EN</span>
       </a>
       <button
         type="button"
@@ -40,7 +55,7 @@ const link = (href: string) => (isHome ? href : withBase(`/${href}`));
         aria-controls="mobile-menu"
         data-menu-toggle
       >
-        <span class="visually-hidden" data-menu-label>Abrir menú</span>
+        <span class="visually-hidden" data-menu-label>{t.menuOpen}</span>
         <Icon name="menu" size={22} class="menu-toggle__open" />
         <Icon name="close" size={22} class="menu-toggle__close" />
       </button>
@@ -49,10 +64,10 @@ const link = (href: string) => (isHome ? href : withBase(`/${href}`));
   </div>
 
   <div class="mobile-menu" id="mobile-menu" data-menu hidden>
-    <nav aria-label="Menú móvil" class="container">
+    <nav aria-label={t.mobileNavLabel} class="container">
       <ul role="list" class="mobile-menu__list">
         {
-          nav.map((item, i) => (
+          t.nav.map((item, i) => (
             <li style={`--i:${i}`}>
               <a href={link(item.href)} class="mobile-menu__link">
                 <span class="mobile-menu__index" aria-hidden="true">
@@ -65,7 +80,7 @@ const link = (href: string) => (isHome ? href : withBase(`/${href}`));
         }
       </ul>
       <a href={link('#contacto')} class="mobile-menu__cta">
-        Cuéntanos tu proyecto
+        {t.hero.tellUs}
         <Icon name="arrow-right" size={18} />
       </a>
     </nav>
@@ -81,7 +96,7 @@ const link = (href: string) => (isHome ? href : withBase(`/${href}`));
 
   const setOpen = (open: boolean, { restoreFocus = false } = {}) => {
     toggle.setAttribute('aria-expanded', String(open));
-    label.textContent = open ? 'Cerrar menú' : 'Abrir menú';
+    label.textContent = (open ? header.dataset.menuCloseLabel : header.dataset.menuOpenLabel) ?? '';
     menu.hidden = !open;
     header.classList.toggle('is-menu-open', open);
     document.documentElement.classList.toggle('menu-locked', open);
@@ -113,6 +128,15 @@ const link = (href: string) => (isHome ? href : withBase(`/${href}`));
       e.preventDefault();
       first.focus();
     }
+  });
+
+  // El selector de idioma abre la otra versión en la sección que se está viendo
+  // (la del enlace activo del menú), no en la del último #ancla de la URL.
+  header.querySelector<HTMLAnchorElement>('[data-lang-switch]')?.addEventListener('click', (e) => {
+    const a = e.currentTarget as HTMLAnchorElement;
+    const active = header.querySelector<HTMLAnchorElement>('[data-nav-link].is-active')?.dataset.navLink;
+    const base = a.href.split('#')[0];
+    a.href = active && active !== '#inicio' && window.scrollY > 80 ? base + active : base;
   });
 
   // Enlace activo según la sección visible (solo en la portada).
@@ -255,6 +279,44 @@ const link = (href: string) => (isHome ? href : withBase(`/${href}`));
 
   .header-cta:hover :global(svg) {
     transform: translateX(2px);
+  }
+
+  /* Selector de idioma: píldora con la opción activa iluminada */
+  .lang-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    min-height: 2.25rem;
+    padding: 3px;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    background: rgb(16 6 40 / 0.6);
+    border-radius: var(--radius-pill);
+  }
+
+  .lang-switch__opt {
+    display: grid;
+    place-items: center;
+    min-width: 1.9rem;
+    height: 1.75rem;
+    border-radius: var(--radius-pill);
+    color: rgb(244 244 245 / 0.55);
+    transition:
+      color var(--duration-fast) ease,
+      background-color var(--duration-fast) ease;
+  }
+
+  .lang-switch:hover .lang-switch__opt:not(.is-active) {
+    color: var(--text);
+  }
+
+  .lang-switch__opt.is-active {
+    color: #fff;
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    box-shadow: 0 0 12px -2px rgb(139 92 246 / 0.8);
   }
 
   .menu-toggle {

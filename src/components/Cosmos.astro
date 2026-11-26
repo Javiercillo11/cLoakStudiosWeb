@@ -51,6 +51,49 @@
 
   const root = document.querySelector<HTMLElement>('[data-cosmos]');
   if (root) init(root);
+  parallax();
+
+  /**
+   * Paralaje de scroll: los elementos con data-depth (nebulosas, asteroides,
+   * planeta) se desplazan más despacio que el contenido, como si estuvieran
+   * más lejos. Se calcula sobre la posición sin desplazar (sin bucles).
+   */
+  function parallax() {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const els = [...document.querySelectorAll<HTMLElement>('[data-depth]')];
+    if (!els.length) return;
+    let base: { el: HTMLElement; top: number; h: number; depth: number }[] = [];
+    const measure = () => {
+      base = els.map((el) => {
+        const py = parseFloat(el.style.getPropertyValue('--py')) || 0;
+        const r = el.getBoundingClientRect();
+        return { el, top: r.top + window.scrollY - py, h: r.height, depth: parseFloat(el.dataset.depth!) || 0 };
+      });
+    };
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const mid = window.scrollY + window.innerHeight / 2;
+      for (const b of base) {
+        const off = Math.max(-220, Math.min(220, (mid - (b.top + b.h / 2)) * b.depth));
+        b.el.style.setProperty('--py', `${off.toFixed(1)}px`);
+      }
+    };
+    const request = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    const reset = () => els.forEach((el) => el.style.removeProperty('--py'));
+    const start = () => {
+      if (reduce.matches) return reset();
+      measure();
+      update();
+    };
+    window.addEventListener('scroll', () => !reduce.matches && request(), { passive: true });
+    window.addEventListener('resize', () => start(), { passive: true });
+    window.addEventListener('load', () => start());
+    reduce.addEventListener('change', start);
+    start();
+  }
 
   function init(root: HTMLElement) {
     const far = root.querySelector<HTMLCanvasElement>('[data-cosmos-far]')!;

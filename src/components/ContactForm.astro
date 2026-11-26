@@ -4,7 +4,8 @@ import '../styles/form.css';
 import Field from './form/Field.astro';
 import ChoiceGroup from './form/ChoiceGroup.astro';
 import Icon from './Icon.astro';
-import { LIMITS, MESSAGE_MIN, OPTIONS, SERVICE_IDS, SERVICE_LABELS } from '../lib/contact/schema';
+import { LIMITS, MESSAGE_MIN, SERVICE_IDS } from '../lib/contact/schema';
+import { getLang, ui } from '../i18n/ui';
 import { resolveMode, supabaseTarget, WEB3FORMS_ENDPOINT } from '../lib/contact/submit';
 
 const accessKey = (import.meta.env.PUBLIC_WEB3FORMS_ACCESS_KEY ?? '').trim();
@@ -20,12 +21,9 @@ if (!import.meta.env.DEV) {
   }
 }
 
-const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
-  web: 'Nueva web o renovación',
-  app: 'Software a medida para tu día a día',
-  qr: 'Acceso directo a tus reseñas',
-  otro: 'Te ayudamos a definirlo',
-};
+const lang = getLang(Astro);
+const tf = ui[lang].form;
+const OPTIONS = tf.options;
 ---
 
 <form
@@ -33,6 +31,7 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
   id="contact-form"
   data-contact-form
   data-mode={mode}
+  data-lang={lang}
   method="post"
   action={mode === 'live' && accessKey ? WEB3FORMS_ENDPOINT : undefined}
   aria-labelledby="contact-title"
@@ -40,11 +39,8 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
   {
     mode === 'test' && (
       <div class="notice notice--test" role="note">
-        <span class="notice__tag">Modo prueba</span>
-        <p>
-          Faltan <code>PUBLIC_WEB3FORMS_ACCESS_KEY</code> y las variables de Supabase. El formulario valida los datos y
-          muestra la solicitud en la consola del navegador, pero <strong>no envía nada</strong>.
-        </p>
+        <span class="notice__tag">{tf.testTag}</span>
+        <p set:html={tf.testNotice} />
       </div>
     )
   }
@@ -52,10 +48,7 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
     mode === 'disabled' && (
       <div class="notice notice--warn" role="note">
         <Icon name="alert" size={20} />
-        <p>
-          El envío online de solicitudes todavía no está activo. Estamos terminando de configurarlo; vuelve a intentarlo
-          en unos días.
-        </p>
+        <p>{tf.disabledNotice}</p>
       </div>
     )
   }
@@ -72,8 +65,8 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
   <!-- 1. Servicio -->
   <fieldset class="service-picker" id="cf-service" aria-describedby="cf-service-error" data-field="cf-service">
     <legend class="field__label">
-      <span>¿Qué servicio te interesa?</span>
-      <span class="field__req">obligatorio</span>
+      <span>{tf.serviceLegend}</span>
+      <span class="field__req">{tf.required}</span>
     </legend>
     <div class="service-picker__grid">
       {
@@ -82,8 +75,8 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
             <input type="radio" name="service" value={id} required class="service-option__input" />
             <span class="service-option__dot" aria-hidden="true" />
             <span class="service-option__text">
-              <span class="service-option__title">{SERVICE_LABELS[id]}</span>
-              <span class="service-option__hint">{serviceHints[id]}</span>
+              <span class="service-option__title">{tf.serviceLabels[id]}</span>
+              <span class="service-option__hint">{tf.serviceHints[id]}</span>
             </span>
           </label>
         ))
@@ -94,11 +87,11 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
 
   <!-- 2. Datos de contacto -->
   <div class="form-grid">
-    <Field id="cf-name" name="name" label="Nombre" required autocomplete="name" maxlength={LIMITS.name} />
+    <Field id="cf-name" name="name" label={tf.name} required autocomplete="name" maxlength={LIMITS.name} />
     <Field
       id="cf-business"
       name="business"
-      label="Nombre del negocio"
+      label={tf.business}
       conditionalRequired
       autocomplete="organization"
       maxlength={LIMITS.business}
@@ -106,18 +99,18 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
     <Field
       id="cf-email"
       name="email"
-      label="Email"
+      label={tf.email}
       type="email"
       required
       autocomplete="email"
       inputmode="email"
       maxlength={LIMITS.email}
-      placeholder="nombre@negocio.com"
+      placeholder={tf.emailPlaceholder}
     />
     <Field
       id="cf-phone"
       name="phone"
-      label="Teléfono"
+      label={tf.phone}
       type="tel"
       autocomplete="tel"
       inputmode="tel"
@@ -127,48 +120,48 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
 
   <!-- 3. Bloques dinámicos por servicio -->
   <fieldset class="service-block" data-service-block="web">
-    <legend class="service-block__legend">Sobre tu página web</legend>
+    <legend class="service-block__legend">{tf.webLegend}</legend>
     <div class="service-block__body">
-      <ChoiceGroup name="web_has_site" legend="¿Tienes una web actualmente?" type="radio" options={OPTIONS.webHasSite} />
-      <ChoiceGroup name="web_needs" legend="¿Qué necesitas?" type="checkbox" options={OPTIONS.webNeeds} />
+      <ChoiceGroup name="web_has_site" legend={tf.webHasSite} type="radio" options={OPTIONS.webHasSite} />
+      <ChoiceGroup name="web_needs" legend={tf.webNeeds} type="checkbox" options={OPTIONS.webNeeds} />
       <div class="form-grid">
         <Field
           id="cf-web-type"
           name="web_business_type"
-          label="Tipo de negocio"
+          label={tf.webType}
           maxlength={LIMITS.webBusinessType}
-          placeholder="Restaurante, clínica, tienda…"
+          placeholder={tf.webTypePlaceholder}
         />
         <Field
           id="cf-web-url"
           name="web_current_url"
-          label="URL actual"
+          label={tf.webUrl}
           type="url"
           inputmode="url"
           autocomplete="url"
           maxlength={LIMITS.url}
-          placeholder="minegocio.es"
+          placeholder={tf.webUrlPlaceholder}
         />
       </div>
     </div>
   </fieldset>
 
   <fieldset class="service-block" data-service-block="app">
-    <legend class="service-block__legend">Sobre tu aplicación</legend>
+    <legend class="service-block__legend">{tf.appLegend}</legend>
     <div class="service-block__body">
-      <ChoiceGroup name="app_manage" legend="¿Qué necesitas gestionar?" type="checkbox" options={OPTIONS.appManage} />
-      <ChoiceGroup name="app_users" legend="¿Cuántas personas la utilizarían?" type="radio" options={OPTIONS.appUsers} />
+      <ChoiceGroup name="app_manage" legend={tf.appManage} type="checkbox" options={OPTIONS.appManage} />
+      <ChoiceGroup name="app_users" legend={tf.appUsers} type="radio" options={OPTIONS.appUsers} />
       <Field
         id="cf-app-tool"
         name="app_current_tool"
-        label="¿Utilizas actualmente alguna herramienta?"
+        label={tf.appTool}
         maxlength={LIMITS.appCurrentTool}
-        placeholder="Excel, papel, otra aplicación…"
+        placeholder={tf.appToolPlaceholder}
       />
       <Field
         id="cf-app-simplify"
         name="app_simplify"
-        label="¿Qué tarea te gustaría simplificar?"
+        label={tf.appSimplify}
         type="textarea"
         rows={3}
         maxlength={LIMITS.appSimplify}
@@ -177,20 +170,20 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
   </fieldset>
 
   <fieldset class="service-block" data-service-block="qr">
-    <legend class="service-block__legend">Sobre tu QR de reseñas</legend>
+    <legend class="service-block__legend">{tf.qrLegend}</legend>
     <div class="service-block__body">
       <Field
         id="cf-qr-url"
         name="qr_review_url"
-        label="Enlace a tu página de reseñas"
+        label={tf.qrUrl}
         type="url"
         inputmode="url"
         maxlength={LIMITS.url}
         placeholder="https://…"
-        hint="Si aún no lo tienes, puedes dejarlo vacío: lo necesitaremos antes de generar el QR final."
+        hint={tf.qrUrlHint}
       />
-      <ChoiceGroup name="qr_platform" legend="Plataforma" type="radio" options={OPTIONS.qrPlatform} />
-      <ChoiceGroup name="qr_placement" legend="¿Dónde utilizarás el QR?" type="checkbox" options={OPTIONS.qrPlacement} />
+      <ChoiceGroup name="qr_platform" legend={tf.qrPlatform} type="radio" options={OPTIONS.qrPlatform} />
+      <ChoiceGroup name="qr_placement" legend={tf.qrPlacement} type="checkbox" options={OPTIONS.qrPlacement} />
     </div>
   </fieldset>
 
@@ -198,19 +191,19 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
   <Field
     id="cf-message"
     name="message"
-    label="Cuéntanos sobre tu proyecto"
+    label={tf.message}
     type="textarea"
     required
     rows={5}
     minlength={MESSAGE_MIN}
     maxlength={LIMITS.message}
     counter
-    placeholder="¿Qué necesitas? ¿Qué te gustaría conseguir?"
+    placeholder={tf.messagePlaceholder}
   />
 
   <!-- Honeypot anti-spam: invisible para personas y tecnologías de apoyo -->
   <div class="hp" aria-hidden="true">
-    <label for="cf-botcheck">No rellenes este campo</label>
+    <label for="cf-botcheck">{tf.honeypot}</label>
     <input type="checkbox" id="cf-botcheck" name="botcheck" tabindex="-1" autocomplete="off" />
   </div>
 
@@ -228,8 +221,8 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
       />
       <span class="consent__box" aria-hidden="true"><Icon name="check" size={14} /></span>
       <span>
-        He leído y acepto la <a href={withBase('/privacidad')} target="_blank" rel="noopener">política de privacidad</a>.{' '}
-        <span class="field__req">obligatorio</span>
+        {tf.privacyPre} <a href={withBase('/privacidad')} target="_blank" rel="noopener">{tf.privacyLink}</a>.{' '}
+        <span class="field__req">{tf.required}</span>
       </span>
     </label>
     <p class="field__error" id="cf-privacy-error" data-error-for="cf-privacy" hidden></p>
@@ -241,12 +234,12 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
   <div class="form-actions">
     <button type="submit" class="submit" data-submit disabled={mode === 'disabled'}>
       <span class="submit__spinner" aria-hidden="true"></span>
-      <span data-submit-label>Enviar solicitud</span>
+      <span data-submit-label>{tf.submit}</span>
       <Icon name="arrow-right" size={18} />
     </button>
     <p class="form-microcopy">
-      Tus datos se utilizarán únicamente para gestionar tu consulta, de acuerdo con la{' '}
-      <a href={withBase('/privacidad')} target="_blank" rel="noopener">política de privacidad</a>.
+      {tf.microcopy}{' '}
+      <a href={withBase('/privacidad')} target="_blank" rel="noopener">{tf.privacyLink}</a>.
     </p>
   </div>
 </form>
@@ -254,10 +247,10 @@ const serviceHints: Record<(typeof SERVICE_IDS)[number], string> = {
 <!-- Confirmación: solo se muestra tras la respuesta afirmativa del servicio de envío -->
 <div class="form-success" data-form-success tabindex="-1" hidden>
   <span class="form-success__icon" aria-hidden="true"><Icon name="check" size={26} /></span>
-  <p class="form-success__tag" data-success-test hidden>Modo prueba · no se ha enviado ningún email</p>
-  <h3 class="form-success__title">¡Gracias por contactar con cLoak Studios!</h3>
-  <p>Hemos recibido tu solicitud. Revisaremos la información y nos pondremos en contacto contigo.</p>
-  <button type="button" class="btn-reset" data-form-reset>Enviar otra solicitud</button>
+  <p class="form-success__tag" data-success-test hidden>{tf.successTest}</p>
+  <h3 class="form-success__title">{tf.successTitle}</h3>
+  <p>{tf.successText}</p>
+  <button type="button" class="btn-reset" data-form-reset>{tf.successAgain}</button>
 </div>
 
 <script>

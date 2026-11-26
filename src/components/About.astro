@@ -1,9 +1,15 @@
 ---
 import Icon, { type Name } from './Icon.astro';
 import Nebula from './Nebula.astro';
-import { pillars } from '../data/services';
+import Asteroid from './Asteroid.astro';
+import OrbitLink from './OrbitLink.astro';
+import { getPillars } from '../data/services';
+import { getLang, ui } from '../i18n/ui';
 import { site } from '../data/site';
 
+const lang = getLang(Astro);
+const t = ui[lang].about;
+const pillars = getPillars(lang);
 const { founder } = site;
 const firstName = founder.name.split(' ')[0];
 
@@ -12,18 +18,18 @@ const glow = ['135deg', '205deg', '160deg', '225deg'];
 ---
 
 <section class="space-section about" id="estudio" aria-labelledby="about-title" data-cosmos-anchor="about">
-  <Nebula src="right" side="left" top="0" flipY />
+  <Nebula src="right" side="right" top="-6%" flipY depth={0.16} />
+  <OrbitLink side="left" top="-7rem" />
+  <Asteroid variant={3} top="6%" left="5%" size={34} depth={0.4} spin={70} />
+  <Asteroid variant={1} top="88%" right="9%" size={28} depth={0.22} spin={95} />
   <div class="frame">
     <div class="frame__row about__grid">
       <div class="about__intro" data-reveal>
-        <p class="eyebrow">Por qué cLoak Studios</p>
-        <h2 id="about-title">Tecnología con propósito.</h2>
-        <p class="lead">
-          Somos un estudio independiente centrado en crear soluciones digitales útiles, claras y bien construidas.
-          Combinamos diseño y desarrollo para que la tecnología trabaje a favor de tu negocio.
-        </p>
+        <p class="eyebrow">{t.eyebrow}</p>
+        <h2 id="about-title">{t.title}</h2>
+        <p class="lead">{t.lead}</p>
         <blockquote class="about__quote">
-          <p>Build beyond the visible.</p>
+          <p>{t.quote}</p>
         </blockquote>
       </div>
 
@@ -46,18 +52,15 @@ const glow = ['135deg', '205deg', '160deg', '225deg'];
     <div class="frame__row founder-row">
       <aside class="founder neon-card" aria-labelledby="founder-title" data-reveal style="--glow-angle:150deg">
         <div class="founder__who">
-          <p class="founder__eyebrow">Quién hay detrás</p>
+          <p class="founder__eyebrow">{t.founderEyebrow}</p>
           <h3 id="founder-title" class="founder__name">{founder.name}</h3>
           <p class="founder__role">{founder.role}</p>
         </div>
-        <p class="founder__text">
-          Detrás de cLoak Studios está {firstName}, desarrollador full stack. Se encarga de cada proyecto de principio
-          a fin: desde la primera conversación hasta el diseño, el desarrollo y la puesta en marcha.
-        </p>
+        <p class="founder__text">{t.founderText(firstName)}</p>
         <a class="founder__link" href={founder.portfolioUrl} target="_blank" rel="noopener">
-          Ver portafolio
+          {t.portfolio}
           <Icon name="arrow-right" size={16} />
-          <span class="visually-hidden">(se abre en una pestaña nueva)</span>
+          <span class="visually-hidden">{t.newTab}</span>
         </a>
       </aside>
     </div>

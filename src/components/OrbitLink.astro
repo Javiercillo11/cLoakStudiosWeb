@@ -1,0 +1,109 @@
+---
+// Fragmento de órbita que entra desde un borde de la pantalla y enlaza una
+// sección con la siguiente (continúa la órbita del portal del hero). Un cometa
+// la recorre de vez en cuando. Decorativo; dentro de una sección con
+// `position: relative`.
+interface Props {
+  /** Borde desde el que entra la órbita. */
+  side: 'left' | 'right';
+  top?: string;
+  /** Retraso del cometa (desincroniza las órbitas). */
+  delay?: string;
+}
+
+const { side, top = '0', delay = '0s' } = Astro.props;
+const id = `orbit-${side}-${top.replace(/[^\w]/g, '')}`;
+// Curva en un lienzo 1000×240: entra por el borde (x=1000) y se pierde hacia el centro.
+const path = 'M1010 6 C 760 10, 470 70, 0 234';
+---
+
+<svg
+  class:list={['orbit-link', `orbit-link--${side}`]}
+  style={`--top:${top};--delay:${delay}`}
+  viewBox="0 0 1000 240"
+  preserveAspectRatio="none"
+  aria-hidden="true"
+>
+  <defs>
+    <linearGradient id={id} x1="1" x2="0" y1="0" y2="0">
+      <stop offset="0" stop-color="#c4b5fd" stop-opacity="0.75" />
+      <stop offset="0.5" stop-color="#8b5cf6" stop-opacity="0.4" />
+      <stop offset="1" stop-color="#8b5cf6" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <path class="orbit-link__line" d={path} stroke={`url(#${id})`} />
+  <path class="orbit-link__comet" d={path} pathLength="1000" />
+</svg>
+
+<style>
+  .orbit-link {
+    position: absolute;
+    z-index: -1;
+    top: var(--top);
+    width: min(52vw, 46rem);
+    height: 15rem;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .orbit-link--right {
+    right: 0;
+  }
+
+  .orbit-link--left {
+    left: 0;
+    scale: -1 1;
+  }
+
+  .orbit-link__line {
+    fill: none;
+    stroke-width: 1.2;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* Cometa: un tramo corto y brillante que recorre la curva y descansa */
+  .orbit-link__comet {
+    fill: none;
+    stroke: #f5f3ff;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 60 940;
+    stroke-dashoffset: 60;
+    vector-effect: non-scaling-stroke;
+    filter: drop-shadow(0 0 4px #c4b5fd) drop-shadow(0 0 8px #8b5cf6);
+    animation: orbit-link 12s cubic-bezier(0.4, 0, 0.6, 1) var(--delay) infinite;
+  }
+
+  @keyframes orbit-link {
+    0% {
+      stroke-dashoffset: 60;
+      opacity: 0;
+    }
+    4% {
+      opacity: 1;
+    }
+    40% {
+      stroke-dashoffset: -940;
+      opacity: 0.2;
+    }
+    41%,
+    100% {
+      stroke-dashoffset: -940;
+      opacity: 0;
+    }
+  }
+
+  @media (max-width: 48rem) {
+    .orbit-link {
+      width: 80vw;
+      height: 9rem;
+      opacity: 0.7;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .orbit-link__comet {
+      display: none;
+    }
+  }
+</style>

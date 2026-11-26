@@ -15,7 +15,8 @@ export function absoluteUrl(path = '/'): string {
   return new URL(withBase(path), import.meta.env.SITE).href;
 }
 
-/** ¿Es la portada? (con o sin barra final). */
+/** ¿Es una portada (española en la raíz o inglesa en /en)? Con o sin barra final. */
 export function isHomePath(pathname: string): boolean {
-  return pathname.replace(/\/+$/, '') === BASE;
+  const p = pathname.replace(/\/+$/, '');
+  return p === BASE || p === `${BASE}/en`;
 }

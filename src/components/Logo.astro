@@ -10,12 +10,14 @@ interface Props {
   wordmark?: boolean;
   href?: string;
   class?: string;
+  /** Nombre accesible del enlace. */
+  label?: string;
 }
 
-const { size = 34, wordmark = true, href = withBase('/'), class: className } = Astro.props;
+const { size = 34, wordmark = true, href = withBase('/'), class: className, label = 'cLoak Studios — inicio' } = Astro.props;
 ---
 
-<a href={href} class:list={['logo', className]} aria-label="cLoak Studios — inicio">
+<a href={href} class:list={['logo', className]} aria-label={label}>
   <Image
     src={logoMark}
     alt=""

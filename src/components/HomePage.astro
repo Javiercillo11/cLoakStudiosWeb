@@ -1,0 +1,60 @@
+---
+import { absoluteUrl } from '../lib/paths';
+import { getLang, ui } from '../i18n/ui';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Cosmos from './Cosmos.astro';
+import Hero from './Hero.astro';
+import Services from './Services.astro';
+import Process from './Process.astro';
+import About from './About.astro';
+import Contact from './Contact.astro';
+import { site } from '../data/site';
+import { getServices } from '../data/services';
+
+const lang = getLang(Astro);
+const t = ui[lang];
+const home = lang === 'en' ? '/en/' : '/';
+const services = getServices(lang);
+
+// Portada (español en / e inglés en /en/): el idioma lo fija la ruta.
+// Solo datos veraces: nombre, URL, descripción y servicios ofrecidos.
+// Sin dirección, teléfono, valoraciones ni datos de empresa sin confirmar.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${absoluteUrl('/')}#website`,
+      url: absoluteUrl(home),
+      name: site.name,
+      inLanguage: lang,
+    },
+    {
+      '@type': 'ProfessionalService',
+      '@id': `${absoluteUrl('/')}#studio`,
+      name: site.name,
+      url: absoluteUrl('/'),
+      description: t.description,
+      logo: absoluteUrl('/icon-512.png'),
+      hasOfferCatalog: {
+        '@type': 'OfferCatalog',
+        name: lang === 'en' ? 'Services' : 'Servicios',
+        itemListElement: services.map((s) => ({
+          '@type': 'Offer',
+          itemOffered: { '@type': 'Service', name: s.title, description: s.description },
+        })),
+      },
+    },
+  ],
+};
+---
+
+<BaseLayout jsonLd={jsonLd} path={home}>
+  <Cosmos>
+    <Hero />
+    <Services />
+    <Process />
+    <About />
+    <Contact />
+  </Cosmos>
+</BaseLayout>

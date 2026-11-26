@@ -11,6 +11,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import WhatsAppButton from '../components/WhatsAppButton.astro';
 import { site } from '../data/site';
+import { getLang, ui } from '../i18n/ui';
 
 interface Props {
   title?: string;
@@ -22,13 +23,17 @@ interface Props {
   jsonLd?: Record<string, unknown>;
 }
 
-const { title = site.title, description = site.description, path = '/', noindex = false, jsonLd } = Astro.props;
+const lang = getLang(Astro);
+const t = ui[lang];
+const { title = t.title, description = t.description, path = '/', noindex = false, jsonLd } = Astro.props;
+// Las portadas tienen versión en los dos idiomas (hreflang).
+const isHome = path === '/' || path === '/en/';
 const canonical = absoluteUrl(path);
 const ogImage = absoluteUrl('/og-image.png');
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang={t.htmlLang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -39,6 +44,15 @@ const ogImage = absoluteUrl('/og-image.png');
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {
+      isHome && (
+        <>
+          <link rel="alternate" hreflang="es" href={absoluteUrl('/')} />
+          <link rel="alternate" hreflang="en" href={absoluteUrl('/en/')} />
+          <link rel="alternate" hreflang="x-default" href={absoluteUrl('/')} />
+        </>
+      )
+    }
     {noindex && <meta name="robots" content="noindex, follow" />}
     <meta name="theme-color" content="#06050B" />
     <meta name="color-scheme" content="dark" />
@@ -56,14 +70,14 @@ const ogImage = absoluteUrl('/og-image.png');
     <!-- Open Graph / Twitter -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={site.name} />
-    <meta property="og:locale" content={site.locale} />
+    <meta property="og:locale" content={t.ogLocale} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="cLoak Studios — Páginas web, aplicaciones y soluciones digitales" />
+    <meta property="og:image:alt" content={t.ogImageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
@@ -72,7 +86,7 @@ const ogImage = absoluteUrl('/og-image.png');
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>
   <body>
-    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <a class="skip-link" href="#contenido">{t.skipLink}</a>
     <Header />
     <main id="contenido" tabindex="-1">
       <slot />

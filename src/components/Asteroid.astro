@@ -1,0 +1,67 @@
+---
+// Asteroide del diseño (recorte de Diseño/principal.jpeg) que flota entre
+// secciones: gira despacio y se desplaza con paralaje al hacer scroll.
+// Decorativo. Se coloca dentro de una sección con `position: relative`.
+import { Image } from 'astro:assets';
+import a1 from '../assets/cosmos/asteroid-1.webp';
+import a2 from '../assets/cosmos/asteroid-2.webp';
+import a3 from '../assets/cosmos/asteroid-3.webp';
+
+interface Props {
+  variant?: 1 | 2 | 3;
+  /** Posición (CSS) dentro de la sección. */
+  top: string;
+  left?: string;
+  right?: string;
+  /** Ancho en px. */
+  size?: number;
+  /** Profundidad del paralaje. */
+  depth?: number;
+  /** Duración del giro (s) y sentido. */
+  spin?: number;
+}
+
+const { variant = 1, top, left, right, size = 40, depth = 0.25, spin = 60 } = Astro.props;
+const src = { 1: a1, 2: a2, 3: a3 }[variant];
+const pos = [`top:${top}`, left && `left:${left}`, right && `right:${right}`, `width:${size}px`, `--spin:${spin}s`]
+  .filter(Boolean)
+  .join(';');
+---
+
+<div class="asteroid" style={pos} data-depth={depth} aria-hidden="true">
+  <Image src={src} alt="" widths={[size * 2]} sizes={`${size}px`} quality={85} format="webp" loading="lazy" decoding="async" />
+</div>
+
+<style>
+  .asteroid {
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+    translate: 0 var(--py, 0px);
+  }
+
+  .asteroid :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    animation: asteroid-spin var(--spin) linear infinite;
+  }
+
+  @keyframes asteroid-spin {
+    to {
+      rotate: 360deg;
+    }
+  }
+
+  @media (max-width: 48rem) {
+    .asteroid {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .asteroid :global(img) {
+      animation: none;
+    }
+  }
+</style>

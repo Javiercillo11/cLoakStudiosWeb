@@ -166,34 +166,62 @@ export function normalizeUrl(value: string): string | null {
 /** ¿El nombre del negocio es obligatorio para este servicio? */
 export const businessRequired = (service: ContactValues['service']) => service === 'qr';
 
-export function validate(v: ContactValues): ContactErrors {
+export type FormLang = 'es' | 'en';
+
+const MESSAGES = {
+  es: {
+    service: 'Elige el servicio que te interesa.',
+    name: 'Escribe tu nombre.',
+    nameShort: 'El nombre es demasiado corto.',
+    business: 'Para preparar el QR necesitamos el nombre del negocio.',
+    email: 'Escribe tu email para poder responderte.',
+    emailFormat: 'Revisa el email: debe tener el formato nombre@dominio.com.',
+    phone: 'Revisa el teléfono: usa solo números, espacios y el prefijo +.',
+    message: 'Cuéntanos brevemente qué necesitas.',
+    messageShort: `Añade un poco más de detalle (mínimo ${MESSAGE_MIN} caracteres).`,
+    privacy: 'Debes aceptar la política de privacidad para enviar la solicitud.',
+    webUrl: 'Revisa la dirección de la web (por ejemplo, minegocio.es).',
+    qrUrl: 'Revisa el enlace de reseñas: debe ser una dirección web válida.',
+  },
+  en: {
+    service: "Choose the service you're interested in.",
+    name: 'Enter your name.',
+    nameShort: 'The name is too short.',
+    business: 'We need the business name to prepare the QR.',
+    email: 'Enter your email so we can reply.',
+    emailFormat: 'Check the email: it should look like name@domain.com.',
+    phone: 'Check the phone number: use only digits, spaces and the + prefix.',
+    message: 'Briefly tell us what you need.',
+    messageShort: `Add a little more detail (at least ${MESSAGE_MIN} characters).`,
+    privacy: 'You must accept the privacy policy to send the request.',
+    webUrl: 'Check the website address (for example, mybusiness.com).',
+    qrUrl: 'Check the reviews link: it must be a valid web address.',
+  },
+} as const;
+
+export function validate(v: ContactValues, lang: FormLang = 'es'): ContactErrors {
+  const m = MESSAGES[lang];
   const e: ContactErrors = {};
 
-  if (!v.service) e.service = 'Elige el servicio que te interesa.';
+  if (!v.service) e.service = m.service;
 
-  if (!v.name) e.name = 'Escribe tu nombre.';
-  else if (v.name.length < 2) e.name = 'El nombre es demasiado corto.';
+  if (!v.name) e.name = m.name;
+  else if (v.name.length < 2) e.name = m.nameShort;
 
-  if (businessRequired(v.service) && !v.business) {
-    e.business = 'Para preparar el QR necesitamos el nombre del negocio.';
-  }
+  if (businessRequired(v.service) && !v.business) e.business = m.business;
 
-  if (!v.email) e.email = 'Escribe tu email para poder responderte.';
-  else if (!EMAIL_RE.test(v.email)) e.email = 'Revisa el email: debe tener el formato nombre@dominio.com.';
+  if (!v.email) e.email = m.email;
+  else if (!EMAIL_RE.test(v.email)) e.email = m.emailFormat;
 
-  if (v.phone && !PHONE_RE.test(v.phone)) e.phone = 'Revisa el teléfono: usa solo números, espacios y el prefijo +.';
+  if (v.phone && !PHONE_RE.test(v.phone)) e.phone = m.phone;
 
-  if (!v.message) e.message = 'Cuéntanos brevemente qué necesitas.';
-  else if (v.message.length < MESSAGE_MIN) e.message = `Añade un poco más de detalle (mínimo ${MESSAGE_MIN} caracteres).`;
+  if (!v.message) e.message = m.message;
+  else if (v.message.length < MESSAGE_MIN) e.message = m.messageShort;
 
-  if (!v.privacy) e.privacy = 'Debes aceptar la política de privacidad para enviar la solicitud.';
+  if (!v.privacy) e.privacy = m.privacy;
 
-  if (v.service === 'web' && v.web.currentUrl && !normalizeUrl(v.web.currentUrl)) {
-    e['web.currentUrl'] = 'Revisa la dirección de la web (por ejemplo, minegocio.es).';
-  }
-  if (v.service === 'qr' && v.qr.reviewUrl && !normalizeUrl(v.qr.reviewUrl)) {
-    e['qr.reviewUrl'] = 'Revisa el enlace de reseñas: debe ser una dirección web válida.';
-  }
+  if (v.service === 'web' && v.web.currentUrl && !normalizeUrl(v.web.currentUrl)) e['web.currentUrl'] = m.webUrl;
+  if (v.service === 'qr' && v.qr.reviewUrl && !normalizeUrl(v.qr.reviewUrl)) e['qr.reviewUrl'] = m.qrUrl;
 
   return e;
 }
@@ -238,7 +266,12 @@ export function serviceDetails(v: ContactValues): [string, string][] {
  * Cuerpo JSON para la API de Web3Forms. Las claves con texto legible se muestran
  * tal cual en el email de notificación. `email` y `name` los usa Web3Forms como reply-to.
  */
-export function buildPayload(v: ContactValues, accessKey: string, receivedAt: Date = new Date()) {
+export function buildPayload(
+  v: ContactValues,
+  accessKey: string,
+  receivedAt: Date = new Date(),
+  lang: FormLang = 'es',
+) {
   const service = v.service ? SERVICE_LABELS[v.service] : '';
   const payload: Record<string, string | boolean> = {
     access_key: accessKey,
@@ -254,6 +287,8 @@ export function buildPayload(v: ContactValues, accessKey: string, receivedAt: Da
   payload['Descripción del proyecto'] = v.message;
   for (const [k, value] of serviceDetails(v)) payload[k] = value;
   payload['Privacidad aceptada'] = 'Sí';
+  // El email de aviso siempre va en español; se indica el idioma de la web desde la que llega.
+  if (lang === 'en') payload['Idioma de la web'] = 'Inglés';
   payload['Fecha de recepción'] = receivedAt.toLocaleString('es-ES', {
     timeZone: 'Europe/Madrid',
     dateStyle: 'long',

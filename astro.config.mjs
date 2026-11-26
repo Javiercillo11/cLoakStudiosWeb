@@ -16,8 +16,15 @@ export default defineConfig({
   output: 'static',
   trailingSlash: 'ignore',
   build: { inlineStylesheets: 'auto' },
+  // Español en la raíz y la versión en inglés en /en/.
+  i18n: {
+    defaultLocale: 'es',
+    locales: ['es', 'en'],
+    routing: { prefixDefaultLocale: false },
+  },
   integrations: [
     sitemap({
+      i18n: { defaultLocale: 'es', locales: { es: 'es-ES', en: 'en' } },
       // Las páginas legales son un borrador (noindex) hasta que estén todos los datos del titular.
       filter: (page) => legalComplete || !/\/(privacidad|aviso-legal)\/?$/.test(page),
     }),

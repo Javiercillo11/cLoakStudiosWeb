@@ -19,9 +19,11 @@ interface Props {
   /** Refleja el recorte en vertical para variar entre secciones. */
   flipY?: boolean;
   opacity?: number;
+  /** Profundidad para el paralaje de scroll (0 = se mueve con el contenido). */
+  depth?: number;
 }
 
-const { src, side, top = '0', flipY = false, opacity = 1 } = Astro.props;
+const { src, side, top = '0', flipY = false, opacity = 1, depth } = Astro.props;
 const image = src === 'left' ? universeLeft : universeRight;
 // Ancho relativo al lienzo de referencia de 1672 px.
 const width = ((image.width / 1672) * 100).toFixed(3);
@@ -33,6 +35,7 @@ const flipX = src !== side;
 <div
   class:list={['nebula', `nebula--${side}`, { 'nebula--flip-x': flipX, 'nebula--flip-y': flipY }]}
   style={`--top:${top};--w:${width}%;--o:${opacity}`}
+  data-depth={depth}
   aria-hidden="true"
 >
   <Image src={image} alt="" quality={92} format="webp" loading="lazy" decoding="async" />
@@ -47,6 +50,7 @@ const flipX = src !== side;
     opacity: var(--o);
     pointer-events: none;
     mix-blend-mode: screen;
+    translate: 0 var(--py, 0px);
     /* Fundido arriba y abajo: las franjas de secciones contiguas se solapan sin corte */
     -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 82%, transparent);
     mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 82%, transparent);

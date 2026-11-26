@@ -7,7 +7,7 @@ export const site = {
   title: 'cLoak Studios',
   description:
     'Creamos páginas web para negocios, aplicaciones de gestión y soluciones QR para reseñas. Cuéntanos qué necesita tu negocio.',
-  tagline: 'Digital solutions for ambitious businesses.',
+  tagline: 'Soluciones digitales para negocios que quieren crecer.',
 
   /** Email de contacto público. Si es null, no se muestra. */
   email: 'fjsanchezv2001@gmail.com' as string | null,

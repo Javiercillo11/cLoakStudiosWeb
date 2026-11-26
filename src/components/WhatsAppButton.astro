@@ -1,48 +1,284 @@
 ---
 import { site } from '../data/site';
 import { whatsappUrl } from '../lib/whatsapp';
+import { getLang, ui } from '../i18n/ui';
 
-const href = whatsappUrl(site.whatsapp.phone, site.whatsapp.message);
+const t = ui[getLang(Astro)].whatsapp;
+const href = whatsappUrl(site.whatsapp.phone, t.message);
 ---
 
 {
   href && (
-    <a
-      class="wa-fab"
-      href={href}
-      target="_blank"
-      rel="noopener"
-      aria-label="Escríbenos por WhatsApp (se abre en una pestaña nueva)"
-      data-wa-fab
-    >
-      <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false">
-        <path
-          fill="currentColor"
-          d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"
-        />
-      </svg>
-    </a>
+    <div class="wa-dock" data-wa-dock>
+      <!-- Bocadillo: mensaje del estudio que invita a escribir (aparece a los pocos segundos) -->
+      <div class="wa-bubble" data-wa-bubble hidden>
+        <a class="wa-bubble__link" href={href} target="_blank" rel="noopener">
+          <span class="wa-bubble__head">
+            <span class="wa-bubble__name">cLoak Studios</span>
+            <span class="wa-bubble__status">
+              <span class="wa-bubble__dot" aria-hidden="true" />
+              {t.status}
+            </span>
+          </span>
+          <span class="wa-bubble__typing" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          <span class="wa-bubble__text">{t.bubble}</span>
+          <span class="visually-hidden"> — {t.label}</span>
+        </a>
+        <button type="button" class="wa-bubble__close" aria-label={t.close} data-wa-close>
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none" />
+          </svg>
+        </button>
+      </div>
+
+      <a class="wa-fab" href={href} target="_blank" rel="noopener" aria-label={t.label} data-wa-fab>
+        <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false">
+          <path
+            fill="currentColor"
+            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"
+          />
+        </svg>
+      </a>
+    </div>
   )
 }
 
 <script>
-  // El botón se oculta mientras el formulario está en pantalla para no tapar campos ni «Enviar».
-  const fab = document.querySelector<HTMLElement>('[data-wa-fab]');
-  const form = document.querySelector('[data-contact-form]')?.closest('.contact__panel') ?? document.querySelector('[data-contact-form]');
-  if (fab && form && 'IntersectionObserver' in window) {
-    new IntersectionObserver(([entry]) => fab.classList.toggle('is-over-form', entry.isIntersecting), {
+  const dock = document.querySelector<HTMLElement>('[data-wa-dock]');
+  const bubble = dock?.querySelector<HTMLElement>('[data-wa-bubble]');
+
+  // El botón y el bocadillo se ocultan mientras el formulario está en pantalla.
+  const form =
+    document.querySelector('[data-contact-form]')?.closest('.contact__panel') ?? document.querySelector('[data-contact-form]');
+  if (dock && form && 'IntersectionObserver' in window) {
+    new IntersectionObserver(([entry]) => dock.classList.toggle('is-over-form', entry.isIntersecting), {
       threshold: 0,
     }).observe(form);
   }
+
+  // Aparece en cada carga de la página; si se cierra, no vuelve hasta recargar.
+  if (dock && bubble) {
+    // Aparece a 1 s de cargar: primero «escribiendo…» y después el mensaje.
+    window.setTimeout(() => {
+      bubble.hidden = false;
+      requestAnimationFrame(() => bubble.classList.add('is-in'));
+      window.setTimeout(() => bubble.classList.add('is-typed'), 1300);
+    }, 1000);
+  }
+
+  const close = () => {
+    if (!bubble) return;
+    bubble.classList.remove('is-in');
+    window.setTimeout(() => (bubble.hidden = true), 300);
+  };
+  dock?.querySelector('[data-wa-close]')?.addEventListener('click', close);
+  dock?.querySelector('.wa-bubble__link')?.addEventListener('click', close);
 </script>
 
 <style>
-  .wa-fab {
+  /* Botón y bocadillo, fijos abajo a la derecha */
+  .wa-dock {
     position: fixed;
     right: max(1rem, env(safe-area-inset-right));
     bottom: max(1rem, env(safe-area-inset-bottom));
     /* Por debajo de la cabecera (50) y del skip-link (100). */
     z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    transition:
+      opacity var(--duration-base) var(--ease-out),
+      visibility var(--duration-base),
+      transform var(--duration-base) var(--ease-out);
+  }
+
+  /* Bocadillo: cristal oscuro con borde violeta y pico hacia el botón */
+  .wa-bubble {
+    position: relative;
+    max-width: min(17rem, calc(100vw - 6.5rem));
+    opacity: 0;
+    transform: translateX(0.6rem) scale(0.92);
+    transform-origin: right center;
+    transition:
+      opacity 0.35s var(--ease-out),
+      transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .wa-bubble.is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  .wa-bubble__link {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.75rem 2.1rem 0.8rem 0.95rem;
+    color: var(--text);
+    text-decoration: none;
+    background:
+      radial-gradient(120% 140% at 100% 0%, rgb(139 92 246 / 0.18), transparent 60%),
+      rgb(14 10 30 / 0.94);
+    border: 1px solid rgb(139 92 246 / 0.55);
+    border-radius: 1rem 1rem 0.35rem 1rem;
+    box-shadow:
+      0 0 22px -6px rgb(139 92 246 / 0.65),
+      0 14px 34px -14px rgb(0 0 0 / 0.9);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    transition: border-color var(--duration-fast) ease;
+  }
+
+  .wa-bubble__link:hover {
+    border-color: rgb(167 139 250 / 0.9);
+  }
+
+  .wa-bubble__link:focus-visible {
+    outline: 2px solid var(--color-soft-lavender);
+    outline-offset: 3px;
+  }
+
+  /* Pico que apunta al botón de WhatsApp */
+  .wa-bubble::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    bottom: 12px;
+    width: 12px;
+    height: 12px;
+    rotate: 45deg;
+    background: rgb(14 10 30 / 0.94);
+    border-top: 1px solid rgb(139 92 246 / 0.55);
+    border-right: 1px solid rgb(139 92 246 / 0.55);
+  }
+
+  .wa-bubble__head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .wa-bubble__name {
+    font-family: var(--font-brand);
+    font-weight: 700;
+  }
+
+  .wa-bubble__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.6875rem;
+    color: rgb(244 244 245 / 0.6);
+  }
+
+  .wa-bubble__dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: #25d366;
+    box-shadow: 0 0 6px #25d366;
+    animation: wa-online 2.4s ease-in-out infinite;
+  }
+
+  @keyframes wa-online {
+    50% {
+      box-shadow: 0 0 0 4px rgb(37 211 102 / 0.15), 0 0 8px #25d366;
+    }
+  }
+
+  .wa-bubble__text {
+    display: none;
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+
+  /* «Escribiendo…» y, después, el mensaje */
+  .wa-bubble__typing {
+    display: inline-flex;
+    gap: 4px;
+    padding: 0.35rem 0 0.2rem;
+  }
+
+  .wa-bubble__typing i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #c4b5fd;
+    animation: wa-typing 1s ease-in-out infinite;
+  }
+
+  .wa-bubble__typing i:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+
+  .wa-bubble__typing i:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+
+  @keyframes wa-typing {
+    0%,
+    100% {
+      opacity: 0.35;
+      transform: translateY(0);
+    }
+    50% {
+      opacity: 1;
+      transform: translateY(-3px);
+    }
+  }
+
+  .wa-bubble.is-typed .wa-bubble__typing {
+    display: none;
+  }
+
+  .wa-bubble.is-typed .wa-bubble__text {
+    display: block;
+    animation: wa-text 0.35s var(--ease-out);
+  }
+
+  @keyframes wa-text {
+    from {
+      opacity: 0;
+      transform: translateY(3px);
+    }
+  }
+
+  .wa-bubble__close {
+    position: absolute;
+    top: 0.45rem;
+    right: 0.45rem;
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    color: rgb(244 244 245 / 0.6);
+    background: transparent;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    transition:
+      color var(--duration-fast) ease,
+      background-color var(--duration-fast) ease;
+  }
+
+  .wa-bubble__close:hover {
+    color: var(--text);
+    background: rgb(139 92 246 / 0.2);
+  }
+
+  .wa-bubble__close:focus-visible {
+    outline: 2px solid var(--color-soft-lavender);
+    outline-offset: 1px;
+  }
+
+  .wa-fab {
+    position: relative;
+    flex: none;
     display: grid;
     place-items: center;
     width: 3.5rem;
@@ -76,20 +312,27 @@ const href = whatsappUrl(site.whatsapp.phone, site.whatsapp.message);
 
   /* Sobre el formulario se oculta en todos los anchos: taparía campos o el texto junto a «Enviar»
      (allí ya está el enlace «¿Prefieres WhatsApp?»). */
-  .wa-fab.is-over-form {
+  .wa-dock.is-over-form {
     opacity: 0;
     visibility: hidden;
     transform: translateY(0.75rem);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .wa-fab {
+    .wa-dock,
+    .wa-fab,
+    .wa-bubble {
       transition: none;
+    }
+
+    .wa-bubble__dot,
+    .wa-bubble__typing i {
+      animation: none;
     }
   }
 
   @media print {
-    .wa-fab {
+    .wa-dock {
       display: none;
     }
   }

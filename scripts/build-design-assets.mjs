@@ -8,6 +8,7 @@
 // en la web estos recortes se mezclan en modo `screen` sobre el cielo común, así
 // su negro desaparece y no se nota ninguna caja.
 import sharp from 'sharp';
+import { writeFileSync } from 'node:fs';
 
 const DIR = 'cLoak Studios/Diseño';
 const OUT = 'src/assets';
@@ -68,7 +69,7 @@ async function cut(input, box, { shapes, plain = '', defs = '', blur = 14, scale
  * con el color medio de su contorno, con borde suave. El texto se pinta luego en
  * HTML, nítido, encima de la escena.
  */
-async function eraseText(input, quads) {
+async function eraseText(input, quads, pad = 4) {
   const { data, info } = await sharp(input).removeAlpha().raw().toBuffer({ resolveWithObject: true });
   const W = info.width;
   const inside = (q, x, y) => {
@@ -83,7 +84,7 @@ async function eraseText(input, quads) {
   for (const q of quads) {
     const xs = q.map((p) => p[0]);
     const ys = q.map((p) => p[1]);
-    const [x0, x1, y0, y1] = [Math.min(...xs) - 4, Math.max(...xs) + 4, Math.min(...ys) - 4, Math.max(...ys) + 4];
+    const [x0, x1, y0, y1] = [Math.min(...xs) - pad, Math.max(...xs) + pad, Math.min(...ys) - pad, Math.max(...ys) + pad];
     // Color de fondo: media del contorno sin los píxeles claros (texto, brillos).
     let r = 0, g = 0, b = 0, n = 0;
     for (let y = y0; y <= y1; y++)
@@ -120,21 +121,173 @@ async function eraseText(input, quads) {
 // Recorte x 436–1170, y 26–478: por debajo del menú y por encima de la barra de
 // servicios. Textos de las pantallas («Ideas que conectan.», «Deja tu reseña»)
 // borrados: se pintan en HTML.
-const principal = await eraseText(`${DIR}/principal.jpeg`, [
-  [[622, 217], [690, 228], [692, 264], [624, 254]],
-  [[892, 247], [939, 252], [934, 277], [888, 274]],
-]);
-await cut(principal, { left: 436, top: 26, width: 734, height: 452 }, {
-  out: 'cosmos/hero-portal.webp',
-  scale: 2,
-  blur: 36,
-  quality: 90,
-  // Se compone en modo normal sobre el mismo violeta del fondo de la web: el
-  // alfa llega a 0 antes de cada borde del recorte (sin caja ni siluetas).
-  shapes: `
+//
+// Fuente: principal-x4.webp, la referencia ampliada ×4 con superresolución
+// (EDSR; ver scripts/upscale-reference.py), mucho más nítida que un reescalado.
+// Se trabaja a ×3 sobre las coordenadas de la referencia de 1170×561.
+const HI = 3;
+const principalHi = await sharp(`${DIR}/principal-x4.webp`)
+  .resize(1170 * HI, 561 * HI, { kernel: 'lanczos3' })
+  .png()
+  .toBuffer();
+const principal = await eraseText(
+  principalHi,
+  [
+    [[622, 217], [690, 228], [692, 264], [624, 254]],
+    [[892, 247], [939, 252], [934, 277], [888, 274]],
+    // Tarjeta de métricas: «12.5k» y el porcentaje.
+    [[828, 160], [858, 160], [858, 172.5], [828, 172.5]],
+    [[828, 175.5], [854, 175.5], [854, 181.5], [828, 181.5]],
+  ].map((q) => q.map(([x, y]) => [x * HI, y * HI])),
+  4 * HI,
+);
+// La escena se separa en capas para animarla sin redibujarla:
+//  - plate: el fondo (portal, roca, nebulosa, paneles) con lo que hay detrás de
+//    cada pieza móvil reconstruido rellenando desde fuera hacia dentro;
+//  - una imagen recortada por pieza móvil (portátil, móvil, tarjeta, planeta,
+//    asteroides), con el mismo fundido de bordes que la escena.
+// Las posiciones (px del recorte de 734×452) se guardan en hero/layers.json.
+{
+  const CW = 734, CH = 452, SC = HI, W2 = CW * SC, H2 = CH * SC;
+  // Fundido general de la escena: el alfa llega a 0 antes de cada borde del
+  // recorte (se compone en modo normal sobre el violeta del fondo de la web).
+  const sceneShapes = `
     <rect x="130" y="70" width="532" height="318" rx="70"/>
-    <rect x="110" y="40" width="440" height="340" rx="60"/>`,
-});
+    <rect x="110" y="40" width="440" height="340" rx="60"/>`;
+  const rgb = await sharp(principal).extract({ left: 436 * SC, top: 26 * SC, width: W2, height: H2 })
+    .sharpen({ sigma: 0.5 }).removeAlpha().raw().toBuffer();
+  const sceneA = await sharp(await mask(CW, CH, sceneShapes, 36)).resize(W2, H2).extractChannel(0).raw().toBuffer();
+  const shapeMask = async (svg) =>
+    sharp(Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${W2}" height="${H2}" viewBox="0 0 ${CW} ${CH}"><rect width="100%" height="100%" fill="#000"/><g fill="#fff">${svg}</g></svg>`))
+      .extractChannel(0).raw().toBuffer();
+
+  const laptop = '<polygon points="159,157 162,153 167,152 327,188 333,191 336,197 366,309 455,338 463,344 463,351 137,304 134,299 140,295 192,298"/>';
+  const sprites = [
+    { name: 'laptop', svg: laptop },
+    { name: 'phone', svg: '<polygon points="478,137 483,131 490,129 558,132 564,134 567,141 512,298 507,302 500,302 433,288 428,284 427,277"/>' },
+    { name: 'card', svg: '<rect x="380.5" y="101" width="62" height="70" rx="4"/>' },
+    { name: 'planet', svg: '<circle cx="685" cy="128" r="85"/>' },
+    { name: 'asteroid1', svg: '<ellipse cx="122" cy="286" rx="17" ry="14"/>', minus: laptop },
+    { name: 'asteroid2', svg: '<ellipse cx="649" cy="328" rx="19" ry="16"/>' },
+  ];
+
+  // Máscara suave de una pieza: la silueta ensanchada `grow` px (del recorte)
+  // con borde difuminado `soft` px. La pieza se lleva así su halo y sus reflejos,
+  // y al flotar no deja un corte nítido sobre el fondo.
+  const softMask = async (svg, grow, soft) =>
+    sharp(Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${W2}" height="${H2}" viewBox="0 0 ${CW} ${CH}">
+      <filter id="f" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="${soft}"/></filter>
+      <rect width="100%" height="100%" fill="#000"/>
+      <g fill="#fff" stroke="#fff" stroke-width="${grow * 2}" stroke-linejoin="round" filter="url(#f)">${svg}</g></svg>`))
+      .extractChannel(0).raw().toBuffer();
+
+  // Zona a reconstruir: unión de las piezas ensanchada 7 px (cubre su halo).
+  const unknown = new Uint8Array(W2 * H2);
+  for (const sp of sprites) {
+    sp.m = await softMask(sp.svg, 2, 1.6);
+    const hole = await softMask(sp.svg, 7, 0.01);
+    if (sp.minus) {
+      const cutM = await shapeMask(sp.minus);
+      for (let i = 0; i < sp.m.length; i++) sp.m[i] = Math.max(0, sp.m[i] - cutM[i]);
+    }
+    for (let i = 0; i < hole.length; i++) if (hole[i] > 6) unknown[i] = 1;
+  }
+
+  // Relleno multiescala («push-pull»): se construye una pirámide promediando solo
+  // los píxeles conocidos y se baja rellenando los huecos con el nivel superior.
+  // El resultado es un degradado limpio de los colores de alrededor, sin vetas.
+  const plate = Buffer.from(rgb);
+  {
+    const levels = [];
+    let w = W2, h = H2;
+    let col = new Float32Array(w * h * 3);
+    let wt = new Float32Array(w * h);
+    for (let i = 0; i < w * h; i++) {
+      if (unknown[i]) continue;
+      wt[i] = 1;
+      col[i * 3] = rgb[i * 3]; col[i * 3 + 1] = rgb[i * 3 + 1]; col[i * 3 + 2] = rgb[i * 3 + 2];
+    }
+    levels.push({ w, h, col, wt });
+    while (w > 2 && h > 2) {
+      const nw = Math.ceil(w / 2), nh = Math.ceil(h / 2);
+      const ncol = new Float32Array(nw * nh * 3), nwt = new Float32Array(nw * nh);
+      for (let y = 0; y < h; y++)
+        for (let x = 0; x < w; x++) {
+          const i = y * w + x, k = (y >> 1) * nw + (x >> 1);
+          const a = wt[i];
+          if (!a) continue;
+          nwt[k] += a;
+          ncol[k * 3] += col[i * 3] * a; ncol[k * 3 + 1] += col[i * 3 + 1] * a; ncol[k * 3 + 2] += col[i * 3 + 2] * a;
+        }
+      for (let k = 0; k < nw * nh; k++)
+        if (nwt[k]) {
+          ncol[k * 3] /= nwt[k]; ncol[k * 3 + 1] /= nwt[k]; ncol[k * 3 + 2] /= nwt[k];
+          nwt[k] = Math.min(1, nwt[k]);
+        }
+      w = nw; h = nh; col = ncol; wt = nwt;
+      levels.push({ w, h, col, wt });
+    }
+    // Bajada: cada nivel completa sus huecos con el superior (interpolación bilineal).
+    for (let l = levels.length - 2; l >= 0; l--) {
+      const L = levels[l], U = levels[l + 1];
+      for (let y = 0; y < L.h; y++)
+        for (let x = 0; x < L.w; x++) {
+          const i = y * L.w + x;
+          if (L.wt[i] >= 1) continue;
+          const fx = Math.min(U.w - 1, Math.max(0, (x - 0.5) / 2)), fy = Math.min(U.h - 1, Math.max(0, (y - 0.5) / 2));
+          const x0 = Math.floor(fx), y0 = Math.floor(fy), x1 = Math.min(U.w - 1, x0 + 1), y1 = Math.min(U.h - 1, y0 + 1);
+          const tx = fx - x0, ty = fy - y0;
+          const a = L.wt[i];
+          for (let c = 0; c < 3; c++) {
+            const v =
+              (U.col[(y0 * U.w + x0) * 3 + c] * (1 - tx) + U.col[(y0 * U.w + x1) * 3 + c] * tx) * (1 - ty) +
+              (U.col[(y1 * U.w + x0) * 3 + c] * (1 - tx) + U.col[(y1 * U.w + x1) * 3 + c] * tx) * ty;
+            L.col[i * 3 + c] = L.col[i * 3 + c] * a + v * (1 - a);
+          }
+          L.wt[i] = 1;
+        }
+    }
+    const F = levels[0];
+    for (let i = 0; i < W2 * H2; i++) {
+      if (!unknown[i]) continue;
+      plate[i * 3] = F.col[i * 3]; plate[i * 3 + 1] = F.col[i * 3 + 1]; plate[i * 3 + 2] = F.col[i * 3 + 2];
+    }
+  }
+
+  const rgba = (src, alphaAt, x0, y0, w, h) => {
+    const out = Buffer.alloc(w * h * 4);
+    for (let y = 0; y < h; y++)
+      for (let x = 0; x < w; x++) {
+        const i = (y0 + y) * W2 + (x0 + x);
+        const o = (y * w + x) * 4;
+        out[o] = src[i * 3]; out[o + 1] = src[i * 3 + 1]; out[o + 2] = src[i * 3 + 2];
+        out[o + 3] = alphaAt(i);
+      }
+    return sharp(out, { raw: { width: w, height: h, channels: 4 } });
+  };
+
+  await rgba(plate, (i) => sceneA[i], 0, 0, W2, H2)
+    .webp({ quality: 90, alphaQuality: 100, smartSubsample: true }).toFile(`${OUT}/hero/plate.webp`);
+  console.log('✓ hero/plate.webp');
+
+  const layers = {};
+  for (const sp of sprites) {
+    let x0 = W2, y0 = H2, x1 = 0, y1 = 0;
+    for (let y = 0; y < H2; y++)
+      for (let x = 0; x < W2; x++)
+        if (sp.m[y * W2 + x] > 0) {
+          x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y);
+        }
+    x0 = Math.max(0, x0 - 2); y0 = Math.max(0, y0 - 2);
+    x1 = Math.min(W2 - 1, x1 + 2); y1 = Math.min(H2 - 1, y1 + 2);
+    const w = x1 - x0 + 1, h = y1 - y0 + 1;
+    await rgba(rgb, (i) => Math.round((sp.m[i] * sceneA[i]) / 255), x0, y0, w, h)
+      .webp({ quality: 90, alphaQuality: 100, smartSubsample: true }).toFile(`${OUT}/hero/${sp.name}.webp`);
+    layers[sp.name] = { x: x0 / SC, y: y0 / SC, w: w / SC, h: h / SC };
+    console.log(`✓ hero/${sp.name}.webp`, w, h);
+  }
+  writeFileSync(`${OUT}/hero/layers.json`, JSON.stringify({ width: CW, height: CH, layers }, null, 2) + '\n');
+}
 
 // ── Servicios (servicios.jpeg) ───────────────────────────────────────────
 const servicios = `${DIR}/servicios.jpeg`;
@@ -183,3 +336,94 @@ for (const { out, left, icon } of cards) {
   await cut(photo, { left, top: 336, width: 316, height: 164 }, { out, scale: 2, quality: 90 });
 }
 
+
+// ── Hero: corteza rocosa a todo el ancho (principal.jpeg, y 392–561) ───────
+// En el diseño la roca recorre todo el hero, también bajo el titular. Se recorta
+// por su silueta (el cielo queda transparente) y se reconstruye la franja que
+// tapaba la barra de servicios del diseño (x 133–977, y 480–521) prolongando la
+// roca de encima en espejo y oscureciéndola hacia abajo, como en los laterales.
+{
+  const TOP = 392;
+  const H = 561 - TOP;
+  const W = 1170;
+  const contour = [
+    [0, 480], [50, 477], [150, 474], [300, 472], [400, 466], [440, 456], [470, 446], [500, 431],
+    [530, 422], [560, 417], [590, 416], [620, 419], [660, 423], [700, 424], [760, 424], [820, 423],
+    [880, 421], [930, 410], [960, 398], [990, 388], [1025, 382], [1060, 382], [1090, 388], [1120, 396],
+    [1150, 410], [1170, 425],
+  ];
+  const { data } = await sharp(`${DIR}/principal.jpeg`).extract({ left: 0, top: TOP, width: W, height: H })
+    .raw().toBuffer({ resolveWithObject: true });
+  // La franja empieza en y 477 (incluye el borde de la barra). Relleno:
+  //  - base: color medio de cada columna en la roca de encima (y 458–476),
+  //    suavizado en horizontal y oscurecido hacia abajo;
+  //  - textura: roca real a la misma altura del lateral derecho (x 980–1165).
+  const STRIP = { x0: 133, x1: 977, y0: 477 };
+  const px = (x, y, c) => data[((y - TOP) * W + x) * 3 + c];
+  const col = [];
+  for (let x = 0; x < W; x++) {
+    const acc = [0, 0, 0];
+    for (let y = 458; y <= 476; y++) for (let c = 0; c < 3; c++) acc[c] += px(x, y, c);
+    col.push(acc.map((v) => v / 19));
+  }
+  const smooth = col.map((_, x) => {
+    const acc = [0, 0, 0];
+    let n = 0;
+    for (let d = -14; d <= 14; d++) {
+      const xx = Math.min(W - 1, Math.max(0, x + d));
+      for (let c = 0; c < 3; c++) acc[c] += col[xx][c];
+      n++;
+    }
+    return acc.map((v) => v / n);
+  });
+  const TX0 = 980;
+  const TW = 185;
+  const out = Buffer.from(data);
+  for (let y = STRIP.y0; y < 561; y++) {
+    const k = y - STRIP.y0;
+    const dark = Math.max(0.3, 1 - k / 80);
+    for (let x = STRIP.x0 - 24; x < STRIP.x1 + 24; x++) {
+      const edge = Math.min(1, Math.max(0, Math.min(x - (STRIP.x0 - 24), STRIP.x1 + 24 - x) / 24));
+      // Dos teselas en vaivén con periodos distintos (derecha 185 px, izquierda
+      // 118 px): sus ejes de simetría no coinciden y no se aprecia repetición.
+      const t = (x - STRIP.x0) % (2 * TW);
+      const tx = TX0 + (t < TW ? t : 2 * TW - 1 - t);
+      const u = (x - STRIP.x0 + 57) % (2 * 118);
+      const ux = 8 + (u < 118 ? u : 2 * 118 - 1 - u);
+      // Fundido vertical con la última fila de roca original (sin costura).
+      const v = Math.min(1, k / 10);
+      const i = ((y - TOP) * W + x) * 3;
+      for (let c = 0; c < 3; c++) {
+        const tex = (px(tx, y, c) + px(ux, y, c)) / 2;
+        const fill = Math.min(255, smooth[x][c] * dark * 0.55 + tex * 0.85);
+        const value = px(x, 476, c) * (1 - v) + fill * v;
+        out[i + c] = Math.round(data[i + c] * (1 - edge) + value * edge);
+      }
+    }
+  }
+  const pts = [...contour.map(([x, y]) => `${x},${y - TOP}`), `${W + 50},${H + 50}`, `-50,${H + 50}`].join(' ');
+  const ground = await sharp(out, { raw: { width: W, height: H, channels: 3 } }).png().toBuffer();
+  await cut(ground, { left: 0, top: 0, width: W, height: H }, {
+    out: 'cosmos/hero-ground.webp',
+    scale: 2,
+    blur: 1.5,
+    quality: 88,
+    shapes: `<polygon points="${pts}"/>`,
+  });
+}
+
+// ── Asteroides sueltos para el resto de la página (principal.jpeg) ────────
+const asteroids = [
+  { out: 'cosmos/asteroid-1.webp', x: 534, y: 290, w: 50, h: 44 },
+  { out: 'cosmos/asteroid-2.webp', x: 1058, y: 330, w: 54, h: 48 },
+  { out: 'cosmos/asteroid-3.webp', x: 458, y: 370, w: 46, h: 44 },
+];
+for (const r of asteroids) {
+  await cut(`${DIR}/principal.jpeg`, { left: r.x, top: r.y, width: r.w, height: r.h }, {
+    out: r.out,
+    scale: 3,
+    blur: 3,
+    quality: 88,
+    shapes: `<ellipse cx="${r.w / 2}" cy="${r.h / 2}" rx="${r.w / 2 - 7}" ry="${r.h / 2 - 7}"/>`,
+  });
+}

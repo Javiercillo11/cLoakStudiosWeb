@@ -1,38 +1,62 @@
 ---
+// «Cómo trabajamos»: los cuatro pasos sobre una órbita (la misma línea de luz
+// que rodea el portal del hero). Sin tarjetas: cada paso es un nodo de la órbita
+// y un cometa la recorre. En móvil la órbita es vertical.
 import Nebula from './Nebula.astro';
-import { process } from '../data/services';
+import { getProcess } from '../data/services';
+import { getLang, ui } from '../i18n/ui';
 
-const glow = ['135deg', '160deg', '200deg', '225deg'];
+const lang = getLang(Astro);
+const t = ui[lang].process;
+const process = getProcess(lang);
+
+// Órbita: curva cuadrática M0 100 Q500 -20 1000 100 (lienzo 1000×120).
+// Altura del nodo de cada paso sobre la curva (t = 0.125, 0.375, 0.625, 0.875).
+const nodeY = [73.75, 43.75, 43.75, 73.75];
+const orbit = 'M0 100 Q500 -20 1000 100';
 ---
 
 <section class="space-section process" id="proceso" aria-labelledby="process-title" data-cosmos-anchor="process">
-  <Nebula src="left" side="right" top="0" flipY />
-  <Nebula src="left" side="left" top="40%" />
+  <Nebula src="left" side="left" top="8%" depth={0.12} />
   <div class="frame">
     <div class="frame__row">
       <header class="process__head" data-reveal>
-        <p class="eyebrow">Cómo trabajamos</p>
-        <h2 id="process-title">De la idea a una solución<br /> que funciona.</h2>
-        <p class="lead">Los plazos y el alcance se concretan en cada propuesta.</p>
+        <p class="eyebrow">{t.eyebrow}</p>
+        <h2 id="process-title">{t.title[0]}<br /> {t.title[1]}</h2>
+        <p class="lead">{t.lead}</p>
       </header>
 
-      <ol role="list" class="steps">
-        {
-          process.map((step, i) => (
-            <li
-              class="step neon-card"
-              data-reveal
-              style={`--reveal-delay:${i * 80}ms;--glow-angle:${glow[i]}`}
-            >
-              <span class="step__num neon-num" aria-hidden="true">
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <h3 class="step__title">{step.title}</h3>
-              <p class="step__text">{step.text}</p>
-            </li>
-          ))
-        }
-      </ol>
+      <div class="timeline">
+        <svg class="timeline__orbit" viewBox="0 0 1000 120" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="orbit-line" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0" stop-color="#8b5cf6" stop-opacity="0" />
+              <stop offset="0.15" stop-color="#8b5cf6" stop-opacity="0.7" />
+              <stop offset="0.5" stop-color="#c4b5fd" />
+              <stop offset="0.85" stop-color="#8b5cf6" stop-opacity="0.7" />
+              <stop offset="1" stop-color="#8b5cf6" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          <path class="timeline__glow" d={orbit} />
+          <path class="timeline__line" d={orbit} />
+          <path class="timeline__trail" d={orbit} pathLength="1000" />
+        </svg>
+
+        <ol role="list" class="steps">
+          {
+            process.map((step, i) => (
+              <li class="step" data-reveal style={`--reveal-delay:${i * 90}ms;--y:${nodeY[i]};--i:${i}`}>
+                <span class="step__node" aria-hidden="true" />
+                <span class="step__num neon-num" aria-hidden="true">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <h3 class="step__title">{step.title}</h3>
+                <p class="step__text">{step.text}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
     </div>
   </div>
 </section>
@@ -44,76 +68,172 @@ const glow = ['135deg', '160deg', '200deg', '225deg'];
     max-width: 40rem;
   }
 
+  .timeline {
+    position: relative;
+    margin-top: clamp(2rem, 1.5rem + 2vw, 3rem);
+  }
+
+  /* ── Móvil: órbita vertical a la izquierda ── */
+  .timeline__orbit {
+    display: none;
+  }
+
   .steps {
     position: relative;
-    isolation: isolate;
     display: grid;
-    gap: 1.375rem;
-    margin-top: clamp(1.75rem, 1.25rem + 1.5vw, 2.5rem);
+    gap: var(--space-8);
+    padding-left: 2.25rem;
+  }
+
+  .steps::before {
+    content: '';
+    position: absolute;
+    left: 0.6rem;
+    top: 0.4rem;
+    bottom: 0.4rem;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, #8b5cf6 10%, #c4b5fd 50%, #8b5cf6 90%, transparent);
+    box-shadow: 0 0 10px rgb(139 92 246 / 0.7);
   }
 
   .step {
+    position: relative;
     display: grid;
-    align-content: start;
     gap: var(--space-2);
-    padding: 1.5rem 1.4rem 1.6rem;
-    transition:
-      transform var(--duration-base) var(--ease-out),
-      opacity var(--duration-slow) var(--ease-out);
+  }
+
+  /* Nodo: punto de luz sobre la órbita, con un latido lento */
+  .step__node {
+    position: absolute;
+    left: calc(-2.25rem + 0.6rem);
+    top: 0.9rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    translate: -50% -50%;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff 0 22%, #c4b5fd 40%, #8b5cf6 70%);
+    box-shadow:
+      0 0 0 4px rgb(139 92 246 / 0.18),
+      0 0 16px 2px rgb(139 92 246 / 0.8);
+    animation: node-pulse 3.2s ease-in-out calc(var(--i) * 0.8s) infinite;
+  }
+
+  @keyframes node-pulse {
+    0%,
+    100% {
+      box-shadow:
+        0 0 0 4px rgb(139 92 246 / 0.18),
+        0 0 14px 2px rgb(139 92 246 / 0.7);
+    }
+    50% {
+      box-shadow:
+        0 0 0 8px rgb(139 92 246 / 0.08),
+        0 0 24px 4px rgb(167 139 250 / 0.95);
+    }
   }
 
   .step__num {
-    font-size: 2rem;
+    font-size: 1.75rem;
     line-height: 1;
-    margin-bottom: var(--space-4);
   }
 
   .step__title {
+    margin-top: var(--space-2);
     font-size: 1.125rem;
   }
 
   .step__text {
-    font-size: 0.875rem;
-    line-height: 1.5;
-    color: rgb(244 244 245 / 0.7);
+    max-width: 22rem;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: rgb(244 244 245 / 0.72);
   }
 
-  .step:hover {
-    --edge: rgb(167 139 250 / 0.7);
-  }
-
-  .step:hover::after {
-    opacity: 0.95;
-  }
-
-  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-    .step:hover {
-      transform: translateY(-4px);
-    }
-  }
-
-  @media (min-width: 40rem) {
-    .steps {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
+  /* ── Escritorio: órbita curva horizontal y nodos sobre ella ── */
   @media (min-width: 60rem) {
+    .timeline__orbit {
+      display: block;
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 120px;
+      overflow: visible;
+    }
+
+    .timeline__line {
+      fill: none;
+      stroke: url(#orbit-line);
+      stroke-width: 1.4;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .timeline__glow {
+      fill: none;
+      stroke: #8b5cf6;
+      stroke-width: 6;
+      opacity: 0.2;
+      filter: blur(4px);
+      vector-effect: non-scaling-stroke;
+    }
+
+    /* Cometa que recorre la órbita */
+    .timeline__trail {
+      fill: none;
+      stroke: #ede9fe;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-dasharray: 70 930;
+      vector-effect: non-scaling-stroke;
+      filter: drop-shadow(0 0 4px #c4b5fd) drop-shadow(0 0 8px #8b5cf6);
+      animation: orbit-trail 9s linear infinite;
+    }
+
+    @keyframes orbit-trail {
+      from {
+        stroke-dashoffset: 70;
+      }
+      to {
+        stroke-dashoffset: -930;
+      }
+    }
+
     .steps {
       grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-6);
+      padding-left: 0;
     }
 
-    /* Hilo de luz que une los pasos */
     .steps::before {
-      content: '';
-      position: absolute;
-      z-index: -2;
-      left: 4%;
-      right: 4%;
-      top: 3.1rem;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, #8b5cf6 12%, #c4b5fd 50%, #8b5cf6 88%, transparent);
-      box-shadow: 0 0 12px 1px rgb(139 92 246 / 0.7);
+      display: none;
+    }
+
+    /* El contenido de cada paso empieza bajo su nodo */
+    .step {
+      padding-top: calc(var(--y) * 1px + 1.75rem);
+      text-align: center;
+      justify-items: center;
+    }
+
+    .step__node {
+      left: 50%;
+      top: calc(var(--y) * 1px);
+      width: 0.9rem;
+      height: 0.9rem;
+    }
+
+    .step__text {
+      max-width: 15rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .step__node {
+      animation: none;
+    }
+
+    .timeline__trail {
+      display: none;
     }
   }
 </style>
