@@ -1,22 +1,29 @@
 ---
 import Icon from './Icon.astro';
-import ServiceVisual from './ServiceVisual.astro';
+import { Image } from 'astro:assets';
+import photoWeb from '../assets/services/web.webp';
+import photoApp from '../assets/services/app.webp';
+import photoQr from '../assets/services/qr.webp';
 import Nebula from './Nebula.astro';
 import { services } from '../data/services';
+
+// Fotos de cada tarjeta (recortes de Diseño/servicios.jpeg).
+const photos = { web: photoWeb, app: photoApp, qr: photoQr } as const;
 
 // Ángulo del reflejo neón del borde de cada tarjeta (como en el diseño).
 const glow = ['135deg', '160deg', '205deg'];
 ---
 
 <section class="services" id="servicios" aria-labelledby="services-title" data-cosmos-anchor="services">
-  <Nebula src="left" side="left" top="-1rem" width="clamp(9rem, 15vw, 18rem)" />
-  <Nebula src="right" side="right" top="-1rem" width="clamp(11rem, 18.8vw, 22rem)" delay="-9s" />
+  <!-- Mismo encuadre que la referencia: el título queda a y≈130 de 941 px -->
+  <Nebula src="left" side="left" top="calc(4.5rem - 7.8vw)" />
+  <Nebula src="right" side="right" top="calc(4.5rem - 7.8vw)" />
   <div class="frame">
     <div class="frame__row">
       <header class="services__head" data-reveal>
         <h2 id="services-title">Soluciones digitales para<br class="br-wide" /> hacer crecer tu negocio.</h2>
         <p class="services__lead">
-          Diseñamos y desarrollamos herramientas digitales que<br class="br-wide" /> resuelven necesidades reales de tu negocio.
+          Diseñamos y desarrollamos herramientas digitales que<br class="br-wide" /> impulsan necesidades reales de tu negocio.
         </p>
       </header>
 
@@ -29,7 +36,9 @@ const glow = ['135deg', '160deg', '205deg'];
               data-reveal
               style={`--reveal-delay:${i * 90}ms;--glow-angle:${glow[i] ?? '135deg'}`}
             >
-              <ServiceVisual id={s.id} />
+              <div class="card__photo">
+                <Image src={photos[s.id]} alt="" widths={[316, 632]} sizes="(min-width: 60rem) 20rem, 100vw" quality={88} format="webp" loading="lazy" decoding="async" />
+              </div>
               <div class="card__body">
                 <div class="card__head">
                   <span class="icon-box">
@@ -52,7 +61,6 @@ const glow = ['135deg', '160deg', '205deg'];
                     </li>
                   ))}
                 </ul>
-                {s.note && <p class="card__note">{s.note}</p>}
                 <a class="card__cta" href={`?servicio=${s.id}#contacto`} data-service-link={s.id}>
                   {s.cta}
                   <Icon name="arrow-right" size={15} />
@@ -69,7 +77,6 @@ const glow = ['135deg', '160deg', '205deg'];
 <style>
   .services {
     position: relative;
-    isolation: isolate;
     padding-block: clamp(3.5rem, 2.5rem + 3vw, 4.5rem) clamp(2rem, 1rem + 3vw, 3.5rem);
   }
 
@@ -240,10 +247,6 @@ const glow = ['135deg', '160deg', '205deg'];
     transform: translateX(3px);
   }
 
-  .card:hover :global(.visual svg) {
-    transform: scale(1.025);
-  }
-
   .card:has(.card__cta:focus-visible) {
     outline: 2px solid var(--focus-ring);
     outline-offset: 3px;
@@ -299,7 +302,7 @@ const glow = ['135deg', '160deg', '205deg'];
       align-items: start;
     }
 
-    .card > :global(.visual) {
+    .card > .card__photo {
       position: sticky;
       top: calc(var(--header-height) + var(--space-4));
     }
@@ -309,10 +312,189 @@ const glow = ['135deg', '160deg', '205deg'];
     }
   }
 
+  /* Foto de la tarjeta: se funde por abajo con el cristal, el icono la solapa */
+  .card__photo {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.7rem 0.7rem 0.35rem 0.35rem;
+    aspect-ratio: 316 / 164;
+  }
+
+  .card__photo :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--duration-slow) var(--ease-out);
+  }
+
+  .card__photo::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 28%;
+    background: linear-gradient(to bottom, transparent, rgb(16 12 30 / 0.85));
+  }
+
+  .card:hover .card__photo :global(img) {
+    transform: scale(1.03);
+  }
+
+  .card__head {
+    position: relative;
+    z-index: 1;
+    margin-top: -1rem;
+  }
+
+  /* Caja de icono rellena, como en el diseño */
+  .card .icon-box {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.45rem;
+    color: #fff;
+    background: linear-gradient(160deg, #6d3ff0, #4c1fb8);
+    border: 1px solid rgb(167 139 250 / 0.7);
+    box-shadow: 0 0 14px -4px rgb(139 92 246 / 0.9);
+  }
+
+  .card__num {
+    font-size: 0.8125rem;
+    letter-spacing: 0.02em;
+    color: rgb(244 244 245 / 0.82);
+  }
+
+  /* Todas las tarjetas con el borde neón intenso de la referencia */
+  .card {
+    --edge: rgb(150 108 250 / 0.85);
+  }
+
+  .card::after {
+    opacity: 0.75;
+  }
+
+  .card__list-title {
+    letter-spacing: 0.08em;
+    color: rgb(244 244 245 / 0.78);
+  }
+
+  .card__list :global(svg) {
+    color: #a37cfa;
+    stroke-width: 2;
+  }
+
   @media (min-width: 60rem) {
+    /*
+     * --s = 1 px de Diseño/servicios.jpeg (la cabecera mide 1103 px, x 240–1343,
+     * y aquí ocupa la fila de contenido).
+     */
+    .services {
+      --s: calc(min(100vw - var(--frame-pad) * 2, var(--row-max)) / 1103);
+    }
+
+    .services__head h2 {
+      font-size: calc(42 * var(--s));
+      line-height: calc(47 / 43);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .services__lead {
+      margin-top: calc(16 * var(--s));
+      max-width: none;
+      font-size: calc(18 * var(--s));
+      line-height: calc(27.5 / 18);
+      color: rgb(244 244 245 / 0.8);
+    }
+
     .services__grid {
       grid-template-columns: repeat(3, 1fr);
-      gap: 1.375rem;
+      gap: calc(26 * var(--s));
+      margin-top: calc(32 * var(--s));
+    }
+
+    .card {
+      padding: calc(10 * var(--s));
+      border-radius: calc(15 * var(--s));
+    }
+
+    .card__photo {
+      aspect-ratio: auto;
+      height: calc(164 * var(--s));
+    }
+
+    .card__body {
+      padding: 0 calc(14 * var(--s)) calc(12 * var(--s));
+    }
+
+    .card__head {
+      margin-top: calc(-17 * var(--s));
+    }
+
+    .card .icon-box {
+      width: calc(32 * var(--s));
+      height: calc(32 * var(--s));
+      border-radius: calc(7 * var(--s));
+    }
+
+    .card .icon-box :global(svg) {
+      width: calc(18 * var(--s));
+      height: calc(18 * var(--s));
+    }
+
+    .card__num {
+      font-size: calc(14 * var(--s));
+    }
+
+    .card__title {
+      margin-top: calc(10 * var(--s));
+      font-family: var(--font-body);
+      font-size: calc(21.5 * var(--s));
+      line-height: calc(24.5 / 21.5);
+      font-weight: 600;
+      letter-spacing: -0.015em;
+    }
+
+    .card__desc {
+      margin-top: calc(11 * var(--s));
+      font-size: calc(14.2 * var(--s));
+      line-height: calc(19.5 / 14.2);
+      letter-spacing: -0.012em;
+      color: rgb(244 244 245 / 0.74);
+    }
+
+    .card__list-title {
+      margin-top: calc(18 * var(--s));
+      font-size: calc(11.5 * var(--s));
+    }
+
+    .card__list {
+      gap: calc(8 * var(--s));
+      margin-top: calc(13 * var(--s));
+      font-size: calc(13.4 * var(--s));
+      line-height: calc(16 / 13.4);
+      letter-spacing: -0.012em;
+    }
+
+    .card__list li {
+      gap: calc(16 * var(--s));
+    }
+
+    .card__list :global(svg) {
+      width: calc(17 * var(--s));
+      height: calc(17 * var(--s));
+      margin-top: 0;
+    }
+
+    .card__cta {
+      min-height: calc(38 * var(--s));
+      padding: 0 calc(18 * var(--s));
+      gap: calc(14 * var(--s));
+      font-size: calc(13.8 * var(--s));
+      font-weight: 500;
+    }
+
+    .card__body > :nth-last-child(2) {
+      margin-bottom: calc(40 * var(--s));
     }
   }
 </style>

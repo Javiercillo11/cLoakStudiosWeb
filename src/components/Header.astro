@@ -199,6 +199,24 @@ const link = (href: string) => (isHome ? href : withBase(`/${href}`));
     color: #fff;
   }
 
+  /* Indicador violeta bajo el enlace activo (como en el diseño) */
+  .site-nav__link {
+    position: relative;
+  }
+
+  .site-nav__link.is-active::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -0.2rem;
+    width: 1.5rem;
+    height: 2px;
+    translate: -50% 0;
+    border-radius: 2px;
+    background: #8b5cf6;
+    box-shadow: 0 0 8px rgb(139 92 246 / 0.8);
+  }
+
   .site-header__actions {
     display: flex;
     align-items: center;

@@ -8,7 +8,7 @@
 
   /* ── Paleta de marca ─────────────────────────────── */
   --color-obsidian: #09090b;
-  --color-space: #030208; /* negro espacial de la referencia */
+  --color-space: #07041a; /* espacio violeta de Diseño/principal.jpeg (junto al portal) */
   --color-electric: #8a3dff; /* violeta eléctrico de los botones (medido: #7734fd–#8433fb) */
   --color-electric-deep: #6f2cf6;
   --color-lavender-text: #c494f3; /* antetítulos */
@@ -89,7 +89,7 @@
   --header-height: 3.5rem;
   --frame-max: 82.5rem; /* lienzo del hero y la cabecera */
   --frame-pad: clamp(1rem, 0.3rem + 1.6vw, 1.75rem);
-  --row-max: 64rem; /* fila de contenido dentro del lienzo */
+  --row-max: 69rem; /* fila de contenido: 1104 px = cabecera de Diseño/servicios.jpeg a 1672 px */
 
   /* ── Elevación (discreta, según guía) ───────────── */
   --shadow-card: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 24px 48px -32px rgb(0 0 0 / 0.8);

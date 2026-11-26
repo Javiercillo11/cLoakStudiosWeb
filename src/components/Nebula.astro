@@ -1,33 +1,38 @@
 ---
-// Nebulosa fotográfica recortada del diseño de referencia (Diseño/2.png),
-// con bordes difuminados y una deriva lenta. Decorativa.
-// Se coloca dentro de una sección con `position: relative; isolation: isolate`.
+// Universo fotográfico del diseño de referencia (Diseño/servicios.jpeg):
+// franjas laterales sin UI, con bordes ya fundidos en el alfa del recorte.
+// Se mezclan en modo `screen` sobre el cielo, así el negro del recorte
+// desaparece y no se nota ninguna caja: el fondo es el mismo en toda la página.
+// Escala con el ancho de la pantalla igual que en la referencia (1672 px).
+// Se coloca dentro de una sección a ancho completo con `position: relative`.
 import { Image } from 'astro:assets';
-import nebulaLeft from '../assets/cosmos/nebula-left.png';
-import nebulaRight from '../assets/cosmos/nebula-right.png';
+import universeLeft from '../assets/cosmos/universe-left.webp';
+import universeRight from '../assets/cosmos/universe-right.webp';
 
 interface Props {
-  /** Recorte: franja izquierda o derecha del diseño. */
+  /** Recorte: franja izquierda (x 0–250) o derecha (x 760–1672) del diseño. */
   src: 'left' | 'right';
   /** Borde de la sección al que se pega. */
   side: 'left' | 'right';
+  /** Posición vertical (CSS). */
   top?: string;
-  width?: string;
+  /** Refleja el recorte en vertical para variar entre secciones. */
+  flipY?: boolean;
   opacity?: number;
-  /** Retraso de la animación (desincroniza las nebulosas). */
-  delay?: string;
 }
 
-const { src, side, top = '0', width = 'clamp(9rem, 14vw, 17rem)', opacity = 1, delay = '0s' } = Astro.props;
-const image = src === 'left' ? nebulaLeft : nebulaRight;
-// Si el recorte se usa en el lado contrario, se refleja para que su borde
-// exterior (el del encuadre original) siga tocando el borde de la pantalla.
-const flip = src !== side;
+const { src, side, top = '0', flipY = false, opacity = 1 } = Astro.props;
+const image = src === 'left' ? universeLeft : universeRight;
+// Ancho relativo al lienzo de referencia de 1672 px.
+const width = ((image.width / 1672) * 100).toFixed(3);
+// Si se usa en el lado contrario se refleja para que el borde del encuadre
+// original siga tocando el borde de la pantalla.
+const flipX = src !== side;
 ---
 
 <div
-  class:list={['nebula', `nebula--${side}`, { 'nebula--flip': flip }]}
-  style={`--top:${top};--w:${width};--o:${opacity};--delay:${delay}`}
+  class:list={['nebula', `nebula--${side}`, { 'nebula--flip-x': flipX, 'nebula--flip-y': flipY }]}
+  style={`--top:${top};--w:${width}%;--o:${opacity}`}
   aria-hidden="true"
 >
   <Image src={image} alt="" quality={92} format="webp" loading="lazy" decoding="async" />
@@ -41,23 +46,17 @@ const flip = src !== side;
     width: var(--w);
     opacity: var(--o);
     pointer-events: none;
-    -webkit-mask-image:
-      linear-gradient(to var(--fade-to), #000 72%, transparent),
-      linear-gradient(to bottom, transparent, #000 14%, #000 84%, transparent);
-    -webkit-mask-composite: source-in;
-    mask-image:
-      linear-gradient(to var(--fade-to), #000 72%, transparent),
-      linear-gradient(to bottom, transparent, #000 14%, #000 84%, transparent);
-    mask-composite: intersect;
+    mix-blend-mode: screen;
+    /* Fundido arriba y abajo: las franjas de secciones contiguas se solapan sin corte */
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 82%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 82%, transparent);
   }
 
   .nebula--left {
-    --fade-to: right;
     left: 0;
   }
 
   .nebula--right {
-    --fade-to: left;
     right: 0;
   }
 
@@ -65,28 +64,24 @@ const flip = src !== side;
     display: block;
     width: 100%;
     height: auto;
-    transform-origin: var(--fade-to) center;
-    animation: nebula-drift 16s ease-in-out var(--delay) infinite alternate;
   }
 
-  .nebula--flip img {
+  .nebula--flip-x img {
     scale: -1 1;
   }
 
-  @keyframes nebula-drift {
-    from {
-      transform: translate3d(0, 10px, 0) scale(1) rotate(-1deg);
-      filter: brightness(0.85);
-    }
-    to {
-      transform: translate3d(0, -26px, 0) scale(1.1) rotate(1.2deg);
-      filter: brightness(1.2);
-    }
+  .nebula--flip-y img {
+    scale: 1 -1;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .nebula img {
-      animation: none;
+  .nebula--flip-x.nebula--flip-y img {
+    scale: -1 -1;
+  }
+
+  /* En pantallas estrechas el recorte derecho invadiría el texto: solo el borde. */
+  @media (max-width: 48rem) {
+    .nebula {
+      opacity: calc(var(--o) * 0.75);
     }
   }
 </style>

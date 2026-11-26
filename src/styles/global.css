@@ -183,10 +183,10 @@ p {
   max-width: 36rem;
 }
 
-/* Sección del universo: contenido en la fila de 64rem y nebulosas detrás */
+/* Sección del universo: contenido en la fila de 64rem y nebulosas detrás.
+   Sin isolation: las nebulosas se mezclan (screen) con el cielo común. */
 .space-section {
   position: relative;
-  isolation: isolate;
   padding-block: clamp(4rem, 3rem + 4vw, 6.5rem);
 }
 

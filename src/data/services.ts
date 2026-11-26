@@ -1,6 +1,6 @@
 import type { ServiceId } from '../lib/contact/schema';
 
-export type IconName = 'monitor' | 'dashboard' | 'qr';
+export type IconName = 'monitor' | 'dashboard' | 'qr' | 'code' | 'gear' | 'scan' | 'window';
 
 export interface Service {
   id: Exclude<ServiceId, 'otro'>;
@@ -22,18 +22,18 @@ export const services: Service[] = [
     id: 'web',
     slug: 'web-para-negocios',
     number: '01',
-    icon: 'monitor',
+    icon: 'code',
     title: 'Páginas web para negocios',
     titleLines: ['Páginas web', 'para negocios'],
     description:
-      'Una web profesional que transmite confianza, presenta tus servicios y ayuda a convertir visitas en nuevos clientes.',
-    listTitle: 'Qué incluye',
+      'Un sitio web profesional que transmita confianza, proyecte tu marca y ayude a convertir visitas en nuevos clientes.',
+    listTitle: 'Qué incluye:',
     items: [
-      'Diseño adaptado a la identidad del negocio.',
-      'Experiencia responsive para móvil, tablet y escritorio.',
-      'Estructura preparada para SEO.',
-      'Formularios y llamadas a la acción.',
-      'Rendimiento y accesibilidad cuidados.',
+      'Diseño adaptado a tu identidad del negocio',
+      'Desarrollo responsive (móvil, tablet, PC)',
+      'Optimización para buscadores (SEO)',
+      'Integración con redes y formularios',
+      'Soporte y actualizaciones',
     ],
     cta: 'Quiero una página web',
   },
@@ -41,42 +41,39 @@ export const services: Service[] = [
     id: 'app',
     slug: 'aplicaciones-de-gestion',
     number: '02',
-    icon: 'dashboard',
+    icon: 'gear',
     title: 'Aplicaciones para gestionar tu negocio',
     titleLines: ['Aplicaciones para', 'gestionar tu negocio'],
     description:
-      'Aplicaciones a medida para organizar el día a día de tu negocio, centralizar información y automatizar tareas.',
-    listTitle: 'Posibles funcionalidades',
+      'Aplicaciones web a medida para organizar y dar seguimiento a tu negocio, con la información y automatización que necesitas.',
+    listTitle: 'Qué incluye:',
     items: [
-      'Gestión de clientes.',
-      'Citas y reservas.',
-      'Empleados y roles.',
-      'Inventario y productos.',
-      'Pedidos y tareas.',
-      'Informes y paneles de control.',
-      'Automatización de procesos.',
+      'Gestión de clientes',
+      'Control de inventario',
+      'Reportes y análisis',
+      'Módulos personalizados',
+      'Acceso seguro y escalable',
     ],
-    note: 'Las funcionalidades se definen tras analizar cada negocio.',
     cta: 'Quiero una aplicación',
   },
   {
     id: 'qr',
     slug: 'qr-para-resenas',
     number: '03',
-    icon: 'qr',
+    icon: 'scan',
     title: 'QR para conseguir reseñas',
     titleLines: ['QR para', 'conseguir reseñas'],
     description:
-      'Facilita que tus clientes lleguen a tu página de reseñas con un código QR personalizado para tu negocio.',
-    listTitle: 'Qué incluye',
+      'Facilita que tus clientes dejen una opinión en minutos con un código QR personalizado para tu negocio.',
+    listTitle: 'Qué incluye:',
     items: [
-      'QR personalizado con la identidad visual del negocio.',
-      'Acceso directo al enlace de reseñas que nos facilites.',
-      'Material preparado para imprimir o mostrar en el establecimiento.',
-      'Instrucciones sencillas para colocarlo y utilizarlo.',
+      'QR personalizado con tu identidad visual del negocio',
+      'Acceso directo a reseñas en Google Maps',
+      'Fácil de compartir',
+      'Estadísticas de escaneo',
+      'Soporte y configuración',
     ],
-    note: 'El QR lleva directamente a tu página de reseñas: cada cliente opina libremente.',
-    cta: 'Quiero mi QR de reseñas',
+    cta: 'Quiero un QR de reseñas',
   },
 ];
 
